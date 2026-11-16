@@ -1,0 +1,8 @@
+./retail_project
+TP1.pdf
+
+# Hors livrables du Jour 1
+.idea/
+J1_Retail_Intelligence/scripts/
+__pycache__/
+*.pyc

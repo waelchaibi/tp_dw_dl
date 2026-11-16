@@ -1,0 +1,3 @@
+﻿lot,domaine,fichier,taille_octets,md5,jumeau,jumeau_md5,contenu_identique,decision
+initial,warehouse,warehouse - Copie.csv,584,d13dc463989ec203b7664a948b017f90,warehouse.dat,d13dc463989ec203b7664a948b017f90,True,exclure de l'ingestion
+initial,web_sales,web_sales - Copie.csv,133790574,8de8887eebeaa0745f58aa76792f2324,web_sales.dat,8de8887eebeaa0745f58aa76792f2324,True,exclure de l'ingestion

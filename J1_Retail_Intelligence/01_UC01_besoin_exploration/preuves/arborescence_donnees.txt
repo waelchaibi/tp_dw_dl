@@ -1,0 +1,74 @@
+retail_project/
+
+initial/customer/
+  customer.dat	13279063
+initial/customer_address/
+  customer_address.dat	5387229
+initial/customer_demographics/
+  customer_demographics.dat	77753083
+initial/date_dim/
+  date_dim.dat	15395800
+initial/household_demographics/
+  household_demographics.dat	155100
+initial/income_band/
+  income_band.dat	327
+initial/inventory/
+  inventory.dat	424943678
+initial/item/
+  item.dat	6799286
+initial/item_marketprices/
+  item_marketprices.dat	4201170
+  item_marketprices_audit.csv	273
+initial/product_reviews/
+  product_reviews.dat	56355389
+initial/promotion/
+  promotion.dat	46396
+initial/reason/
+  reason.dat	3105
+initial/ship_mode/
+  ship_mode.dat	1220
+initial/store/
+  store.dat	3386
+initial/store_returns/
+  store_returns.dat	4337400
+initial/store_sales/
+  store_sales.dat	92764700
+initial/time_dim/
+  time_dim.dat	5107780
+initial/warehouse/
+  warehouse - Copie.csv	584
+  warehouse.dat	584
+initial/web_clickstreams/
+  web_clickstreams.dat	178722140
+initial/web_page/
+  web_page.dat	8040
+initial/web_returns/
+  web_returns.dat	5383513
+initial/web_sales/
+  web_sales - Copie.csv	133790574
+  web_sales.dat	133790574
+initial/web_site/
+  web_site.dat	8838
+refresh/customer/
+  customer.dat	134360
+refresh/customer_address/
+  customer_address.dat	54587
+refresh/inventory/
+  inventory.dat	4292915
+refresh/item/
+  item.dat	69173
+refresh/item_marketprices/
+  item_marketprices.dat	42547
+  item_marketprices_audit.csv	151009
+refresh/product_reviews/
+  product_reviews.dat	573685
+refresh/store_returns/
+  store_returns.dat	48825
+refresh/store_sales/
+  store_sales.dat	922171
+refresh/web_clickstreams/
+  web_clickstreams.dat	1821864
+refresh/web_returns/
+  web_returns.dat	55952
+refresh/web_sales/
+  web_sales.dat	1378425

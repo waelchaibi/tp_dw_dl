@@ -1,0 +1,10 @@
+Méthode de mesure
+- Lecture intégrale, séparateur |, sans en-tête.
+- Les noms de colonnes sont appliqués seulement si la largeur observée est égale à la largeur du schéma de référence.
+- Une relation est Vérifiée lorsque chaque valeur non vide existe dans la clé du référentiel cible.
+- Une relation est À confirmer si le taux d'orphelins est inférieur ou égal à 1 %.
+- Au-delà, la relation est Non confirmée.
+- Les sommes monétaires sont des centimes entiers, pour éviter un cumul en virgule flottante.
+- Les fichiers dont le nom contient « Copie » sont comparés par MD5 au fichier jumeau et ne sont pas rejoués dans les jointures.
+- Les fichiers audit sont des rapports de contrôle, pas des faits de vente.
+- Les clés des deux lots sont réunies avant le contrôle d'orphelins : un fait du refresh peut référencer un référentiel du lot initial.
