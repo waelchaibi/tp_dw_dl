@@ -24,13 +24,8 @@ Les fichiers mesurés restent dans `retail_project/`. Ils ne sont pas déplacés
   limites_hypotheses.pdf
   preuves/
 02_UC02_architecture/
-  comparaison_architectures.pdf
-  architecture_cible.pdf
-  schema_flux.pdf
-  positionnement_composants.pdf
-  gouvernance.pdf
-  local_vers_azure.pdf
-  preuves/
+  UC02_architecture.pdf
+  UC02_preuves/
 ```
 
 ## Régénérer les mesures et les documents
