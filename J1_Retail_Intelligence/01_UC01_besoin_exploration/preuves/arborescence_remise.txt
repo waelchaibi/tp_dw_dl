@@ -1,41 +1,25 @@
 J1_Retail_Intelligence/
 
 01_UC01_besoin_exploration/
-01_UC01_besoin_exploration/cadrage_metier.pdf	111225
-01_UC01_besoin_exploration/dictionnaire_KPI.xlsx	9106
-01_UC01_besoin_exploration/inventaire_sources.xlsx	46848
-01_UC01_besoin_exploration/limites_hypotheses.pdf	81053
+01_UC01_besoin_exploration/UC01_besoin_donnees.pdf	205292
+01_UC01_besoin_exploration/dictionnaire_KPI.xlsx	9098
+01_UC01_besoin_exploration/inventaire_sources.xlsx	46807
 01_UC01_besoin_exploration/preuves/
-01_UC01_besoin_exploration/preuves/arborescence_donnees.txt	1810
-01_UC01_besoin_exploration/preuves/arborescence_remise.txt	1743
-01_UC01_besoin_exploration/preuves/colonnes.csv	42984
-01_UC01_besoin_exploration/preuves/doublons.csv	399
-01_UC01_besoin_exploration/preuves/fichiers.csv	4702
-01_UC01_besoin_exploration/preuves/initial_vs_refresh.csv	1422
-01_UC01_besoin_exploration/preuves/mesures.json	256356
-01_UC01_besoin_exploration/preuves/methode_mesure.txt	891
-01_UC01_besoin_exploration/preuves/relations.csv	9338
+01_UC01_besoin_exploration/preuves/arborescence_donnees.txt	1736
+01_UC01_besoin_exploration/preuves/arborescence_remise.txt	1257
+01_UC01_besoin_exploration/preuves/colonnes.csv	42461
+01_UC01_besoin_exploration/preuves/doublons.csv	396
+01_UC01_besoin_exploration/preuves/fichiers.csv	4695
+01_UC01_besoin_exploration/preuves/initial_vs_refresh.csv	1398
+01_UC01_besoin_exploration/preuves/mesures.json	246264
+01_UC01_besoin_exploration/preuves/methode_mesure.txt	881
+01_UC01_besoin_exploration/preuves/relations.csv	9233
 01_UC01_besoin_exploration/preuves/schema_fonctionnel.png	34051
-01_UC01_besoin_exploration/qualification_donnees.pdf	100471
-01_UC01_besoin_exploration/questions_decisionnelles.pdf	69995
 02_UC02_architecture/
-02_UC02_architecture/architecture_cible.pdf	205364
-02_UC02_architecture/comparaison_architectures.pdf	78639
-02_UC02_architecture/gouvernance.pdf	71843
-02_UC02_architecture/local_vers_azure.pdf	117598
-02_UC02_architecture/positionnement_composants.pdf	71113
-02_UC02_architecture/preuves/
-02_UC02_architecture/preuves/arborescence_remise.txt	1743
-02_UC02_architecture/preuves/architecture_cible.png	86258
-02_UC02_architecture/preuves/local_vers_azure.png	54280
-02_UC02_architecture/preuves/schema_flux.png	37928
-02_UC02_architecture/preuves/zones.png	59581
-02_UC02_architecture/schema_flux.pdf	112536
-README.md	1668
-scripts/
-scripts/diagrammes.py	9686
-scripts/generer_livrables.py	78249
-scripts/inventaire.py	28022
-scripts/pdf_util.py	4183
-scripts/requirements.txt	25
-scripts/schemas.py	14193
+02_UC02_architecture/UC02_architecture.pdf	173838
+02_UC02_architecture/UC02_preuves/
+02_UC02_architecture/UC02_preuves/01_schema_architecture_flux.png	81226
+02_UC02_architecture/UC02_preuves/02_tableaux_UC02.xlsx	12584
+02_UC02_architecture/UC02_preuves/03_formats_volumes.txt	1348
+02_UC02_architecture/UC02_preuves/04_controles_qualite.txt	3009
+02_UC02_architecture/UC02_preuves/LISEZMOI.md	897
