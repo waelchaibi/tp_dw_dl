@@ -1,0 +1,27 @@
+# Étape 3 – 2026-11-17 13:57:59 UTC – hôte lake – utilisateur etudiant
+
+$ hdfs dfs -mkdir -p /retail-lake/raw/tpcxbb/initial
+
+$ hdfs dfs -mkdir -p /retail-lake/raw/tpcxbb/refresh
+
+$ hdfs dfs -mkdir -p /retail-lake/bronze/tpcxbb
+
+$ hdfs dfs -mkdir -p /retail-lake/silver
+
+$ hdfs dfs -mkdir -p /retail-lake/gold
+
+$ hdfs dfs -mkdir -p /retail-lake/quality
+
+$ hdfs dfs -mkdir -p /retail-lake/logs
+
+$ hdfs dfs -ls -R /retail-lake
+drwxr-xr-x   - etudiant supergroup          0 2026-11-17 13:58 /retail-lake/bronze
+drwxr-xr-x   - etudiant supergroup          0 2026-11-17 13:58 /retail-lake/bronze/tpcxbb
+drwxr-xr-x   - etudiant supergroup          0 2026-11-17 13:58 /retail-lake/gold
+drwxr-xr-x   - etudiant supergroup          0 2026-11-17 13:58 /retail-lake/logs
+drwxr-xr-x   - etudiant supergroup          0 2026-11-17 13:58 /retail-lake/quality
+drwxr-xr-x   - etudiant supergroup          0 2026-11-17 13:58 /retail-lake/raw
+drwxr-xr-x   - etudiant supergroup          0 2026-11-17 13:58 /retail-lake/raw/tpcxbb
+drwxr-xr-x   - etudiant supergroup          0 2026-11-17 13:58 /retail-lake/raw/tpcxbb/initial
+drwxr-xr-x   - etudiant supergroup          0 2026-11-17 13:58 /retail-lake/raw/tpcxbb/refresh
+drwxr-xr-x   - etudiant supergroup          0 2026-11-17 13:58 /retail-lake/silver

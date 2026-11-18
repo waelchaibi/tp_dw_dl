@@ -1,0 +1,24 @@
+# Étape 2 – 2026-11-17 13:57:52 UTC – hôte lake – utilisateur etudiant
+
+$ hdfs dfsadmin -safemode get
+Safe mode is OFF
+
+$ hdfs dfsadmin -printTopology
+Rack: /default-rack
+   127.0.0.1:9866 (localhost) In Service
+
+
+$ hdfs dfs -ls /
+
+$ hdfs dfs -mkdir -p /retail-lake
+
+$ hdfs dfs -ls -d /retail-lake
+drwxr-xr-x   - etudiant supergroup          0 2026-11-17 13:57 /retail-lake
+
+$ hdfs dfs -ls /retail-lake
+
+$ hdfs dfs -du -h /retail-lake
+
+$ hdfs dfs -df -h /
+Filesystem              Size  Used  Available  Use%
+hdfs://localhost:9000  3.0 T   8 K    559.1 G    0%

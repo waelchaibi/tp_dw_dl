@@ -1,4 +1,3 @@
-retail_project/
 TP1.pdf
 
 # Hors livrables du Jour 1
@@ -6,3 +5,4 @@ TP1.pdf
 J1_Retail_Intelligence/scripts/
 __pycache__/
 *.pyc
+retail_project/

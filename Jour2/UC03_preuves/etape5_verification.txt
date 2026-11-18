@@ -1,0 +1,98 @@
+# Étape 5 – 2026-11-17 13:58:12 UTC – hôte lake – utilisateur etudiant
+
+$ hdfs dfs -ls -R /retail-lake
+drwxr-xr-x   - etudiant supergroup          0 2026-11-17 13:58 /retail-lake/bronze
+drwxr-xr-x   - etudiant supergroup          0 2026-11-17 13:58 /retail-lake/bronze/tpcxbb
+drwxr-xr-x   - etudiant supergroup          0 2026-11-17 13:58 /retail-lake/gold
+drwxr-xr-x   - etudiant supergroup          0 2026-11-17 13:58 /retail-lake/logs
+drwxr-xr-x   - etudiant supergroup          0 2026-11-17 13:58 /retail-lake/quality
+drwxr-xr-x   - etudiant supergroup          0 2026-11-17 13:58 /retail-lake/raw
+drwxr-xr-x   - etudiant supergroup          0 2026-11-17 13:58 /retail-lake/raw/tpcxbb
+drwxr-xr-x   - etudiant supergroup          0 2026-11-17 13:58 /retail-lake/raw/tpcxbb/initial
+drwxr-xr-x   - etudiant supergroup          0 2026-11-17 13:58 /retail-lake/raw/tpcxbb/initial/store_sales
+-rw-r--r--   1 etudiant supergroup   92764700 2026-11-17 13:58 /retail-lake/raw/tpcxbb/initial/store_sales/store_sales.dat
+drwxr-xr-x   - etudiant supergroup          0 2026-11-17 13:58 /retail-lake/raw/tpcxbb/refresh
+drwxr-xr-x   - etudiant supergroup          0 2026-11-17 13:58 /retail-lake/raw/tpcxbb/refresh/store_sales
+-rw-r--r--   1 etudiant supergroup     922171 2026-11-17 13:58 /retail-lake/raw/tpcxbb/refresh/store_sales/store_sales.dat
+drwxr-xr-x   - etudiant supergroup          0 2026-11-17 13:58 /retail-lake/silver
+
+$ hdfs dfs -du -h /retail-lake/raw/tpcxbb
+88.5 M   88.5 M   /retail-lake/raw/tpcxbb/initial
+900.6 K  900.6 K  /retail-lake/raw/tpcxbb/refresh
+
+$ hdfs dfs -stat '%n taille=%b octets replication=%r bloc=%o proprietaire=%u:%g droits=%A modifie=%y' /retail-lake/raw/tpcxbb/initial/store_sales/store_sales.dat
+store_sales.dat taille=92764700 octets replication=1 bloc=134217728 proprietaire=etudiant:supergroup droits=rw-r--r-- modifie=2026-11-17 13:58:10
+
+$ stat -c "%n taille=%s octets" /data/retail_project/data/store_sales/store_sales.dat
+/data/retail_project/data/store_sales/store_sales.dat taille=92764700 octets
+
+$ hdfs dfs -cat /retail-lake/raw/tpcxbb/initial/store_sales/store_sales.dat | head -n 2
+36890|71480|10001|44404|493944|2898|44093|10|294|0|31|18.00|30.78|23.08|238.70|715.48|558.00|954.18|21.46|0.00|715.48|736.94|157.48
+36890|71480|10000|44404|493944|2898|44093|10|279|0|54|99.21|148.82|83.34|3535.92|4500.36|5357.34|8036.28|225.02|0.00|4500.36|4725.38|-856.98
+cat: Unable to write to output stream.
+
+$ sha256sum < /data/retail_project/data/store_sales/store_sales.dat
+7e0a7f16b47483741754bb641c92601dd7384dacc8331d0bcfb8abac82ed3d2e  -
+
+$ hdfs dfs -cat /retail-lake/raw/tpcxbb/initial/store_sales/store_sales.dat | sha256sum
+7e0a7f16b47483741754bb641c92601dd7384dacc8331d0bcfb8abac82ed3d2e  -
+
+$ sha256sum < /data/retail_project/data_refresh/store_sales/store_sales.dat
+3c71c010a17d15c90564ddb12be4a1286f494669198b55e782edef6f8e8b23df  -
+
+$ hdfs dfs -cat /retail-lake/raw/tpcxbb/refresh/store_sales/store_sales.dat | sha256sum
+3c71c010a17d15c90564ddb12be4a1286f494669198b55e782edef6f8e8b23df  -
+
+$ hdfs dfs -get /retail-lake/raw/tpcxbb/initial/store_sales/store_sales.dat /tmp/store_sales_from_hdfs.dat
+
+$ cmp /data/retail_project/data/store_sales/store_sales.dat /tmp/store_sales_from_hdfs.dat && echo IDENTIQUE
+IDENTIQUE
+
+$ rm /tmp/store_sales_from_hdfs.dat
+
+$ hdfs fsck /retail-lake/raw/tpcxbb/initial/store_sales/store_sales.dat -files -blocks
+Connecting to namenode via http://localhost:9870/fsck?ugi=etudiant&files=1&blocks=1&path=%2Fretail-lake%2Fraw%2Ftpcxbb%2Finitial%2Fstore_sales%2Fstore_sales.dat
+FSCK started by etudiant (auth:SIMPLE) from /127.0.0.1 for path /retail-lake/raw/tpcxbb/initial/store_sales/store_sales.dat at Tue Nov 17 13:58:20 GMT 2026
+
+/retail-lake/raw/tpcxbb/initial/store_sales/store_sales.dat 92764700 bytes, replicated: replication=1, 1 block(s):  OK
+0. BP-1621387934-172.24.0.2-1794921334518:blk_1073741826_1002 len=92764700 Live_repl=1
+
+
+Status: HEALTHY
+ Number of data-nodes:	1
+ Number of racks:		1
+ Total dirs:			0
+ Total symlinks:		0
+
+Replicated Blocks:
+ Total size:	92764700 B
+ Total files:	1
+ Total blocks (validated):	1 (avg. block size 92764700 B)
+ Minimally replicated blocks:	1 (100.0 %)
+ Over-replicated blocks:	0 (0.0 %)
+ Under-replicated blocks:	0 (0.0 %)
+ Mis-replicated blocks:		0 (0.0 %)
+ Default replication factor:	1
+ Average block replication:	1.0
+ Missing blocks:		0
+ Corrupt blocks:		0
+ Missing replicas:		0 (0.0 %)
+ Blocks queued for replication:	0
+
+Erasure Coded Block Groups:
+ Total size:	0 B
+ Total files:	0
+ Total block groups (validated):	0
+ Minimally erasure-coded block groups:	0
+ Over-erasure-coded block groups:	0
+ Under-erasure-coded block groups:	0
+ Unsatisfactory placement block groups:	0
+ Average block group size:	0.0
+ Missing block groups:		0
+ Corrupt block groups:		0
+ Missing internal blocks:	0
+ Blocks queued for replication:	0
+FSCK ended at Tue Nov 17 13:58:20 GMT 2026 in 8 milliseconds
+
+
+The filesystem under path '/retail-lake/raw/tpcxbb/initial/store_sales/store_sales.dat' is HEALTHY
