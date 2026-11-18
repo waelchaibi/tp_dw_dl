@@ -1,16 +1,23 @@
 services:
   lake:
-    build: ./docker
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
     image: retail-lake:tp2
     hostname: lake
+    environment:
+      JUPYTER_TOKEN: ${JUPYTER_TOKEN:-tp}
     ports:
       - "127.0.0.1:9870:9870"
       - "127.0.0.1:9864:9864"
       - "127.0.0.1:8443:8443"
+      - "127.0.0.1:8888:8888"
+      - "127.0.0.1:4040:4040"
     volumes:
       - hadoop-data:/home/etudiant/hadoop-data
       - nifi:/opt/nifi
       - ./retail_project:/data/retail_project:ro
+      - ./notebooks:/home/etudiant/notebooks
     security_opt:
       - label=disable
     stop_grace_period: 60s

@@ -7,3 +7,6 @@ J1_Retail_Intelligence/scripts/
 __pycache__/
 *.pyc
 retail_project/
+
+# Environnement Python local (uv)
+.venv/
