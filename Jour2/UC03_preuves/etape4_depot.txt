@@ -1,0 +1,33 @@
+# Étape 4 – 2026-11-17 13:58:07 UTC – hôte lake – utilisateur etudiant
+
+$ ls -l /data/retail_project/data/store_sales/store_sales.dat
+-rw-rw-rw-. 1 ubuntu ubuntu 92764700 Nov 15 22:34 /data/retail_project/data/store_sales/store_sales.dat
+
+$ wc -l < /data/retail_project/data/store_sales/store_sales.dat
+667579
+
+$ head -n 2 /data/retail_project/data/store_sales/store_sales.dat
+36890|71480|10001|44404|493944|2898|44093|10|294|0|31|18.00|30.78|23.08|238.70|715.48|558.00|954.18|21.46|0.00|715.48|736.94|157.48
+36890|71480|10000|44404|493944|2898|44093|10|279|0|54|99.21|148.82|83.34|3535.92|4500.36|5357.34|8036.28|225.02|0.00|4500.36|4725.38|-856.98
+
+$ head -n 1 /data/retail_project/data/store_sales/store_sales.dat | awk -F'|' '{print NF " colonnes, séparateur |"}'
+23 colonnes, séparateur |
+
+$ file /data/retail_project/data/store_sales/store_sales.dat
+main: line 3: file: command not found
+
+$ hdfs dfs -mkdir -p /retail-lake/raw/tpcxbb/initial/store_sales /retail-lake/raw/tpcxbb/refresh/store_sales
+
+$ hdfs dfs -put /data/retail_project/data/store_sales/store_sales.dat /retail-lake/raw/tpcxbb/initial/store_sales/
+
+$ hdfs dfs -put /data/retail_project/data_refresh/store_sales/store_sales.dat /retail-lake/raw/tpcxbb/refresh/store_sales/
+
+$ hdfs dfs -ls -h /retail-lake/raw/tpcxbb/initial/store_sales /retail-lake/raw/tpcxbb/refresh/store_sales
+Found 1 items
+-rw-r--r--   1 etudiant supergroup     88.5 M 2026-11-17 13:58 /retail-lake/raw/tpcxbb/initial/store_sales/store_sales.dat
+Found 1 items
+-rw-r--r--   1 etudiant supergroup    900.6 K 2026-11-17 13:58 /retail-lake/raw/tpcxbb/refresh/store_sales/store_sales.dat
+
+$ ls -l /data/retail_project/data/store_sales/store_sales.dat /data/retail_project/data_refresh/store_sales/store_sales.dat
+-rw-rw-rw-. 1 ubuntu ubuntu 92764700 Nov 15 22:34 /data/retail_project/data/store_sales/store_sales.dat
+-rw-rw-rw-. 1 ubuntu ubuntu   922171 Nov 15 22:34 /data/retail_project/data_refresh/store_sales/store_sales.dat

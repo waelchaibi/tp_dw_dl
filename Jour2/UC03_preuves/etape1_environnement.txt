@@ -1,0 +1,96 @@
+# Étape 1 – 2026-11-17 13:57:51 UTC – hôte lake – utilisateur etudiant
+
+$ hadoop version
+Hadoop 3.5.0
+Source code repository https://github.com/apache/hadoop.git -r dbcc7cd797100e6b32cd84f85b53a5193a5f9af0
+Compiled by cnauroth on 2026-03-24T16:56Z
+Compiled on platform linux-x86_64
+Compiled with protoc 3.25.5
+From source with checksum 64582ed0a62a169c39a19c734a8f33b5
+This command was run using /opt/hadoop/share/hadoop/common/hadoop-common-3.5.0.jar
+
+$ echo $HADOOP_HOME $HADOOP_CONF_DIR
+/opt/hadoop /opt/hadoop/etc/hadoop
+
+$ grep -v "^#" $HADOOP_HOME/etc/hadoop/hadoop-env.sh | grep JAVA_HOME
+export JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
+
+$ cat $HADOOP_CONF_DIR/core-site.xml
+<configuration>
+  <property>
+    <name>fs.defaultFS</name>
+    <value>hdfs://localhost:9000</value>
+  </property>
+</configuration>
+
+$ cat $HADOOP_CONF_DIR/hdfs-site.xml
+<configuration>
+  <property>
+    <name>dfs.replication</name>
+    <value>1</value>
+  </property>
+  <property>
+    <name>dfs.namenode.name.dir</name>
+    <value>file:///home/etudiant/hadoop-data/namenode</value>
+  </property>
+  <property>
+    <name>dfs.datanode.data.dir</name>
+    <value>file:///home/etudiant/hadoop-data/datanode</value>
+  </property>
+</configuration>
+
+$ jps
+33 NameNode
+1 NiFi
+119 DataNode
+697 Jps
+
+$ hdfs dfsadmin -report
+Configured Capacity: 3341183287296 (3.04 TB)
+Present Capacity: 600308043776 (559.08 GB)
+DFS Remaining: 600308035584 (559.08 GB)
+DFS Used: 8192 (8 KB)
+DFS Used%: 0.00%
+Replicated Blocks:
+	Under replicated blocks: 0
+	Blocks with corrupt replicas: 0
+	Missing blocks: 0
+	Missing blocks (with replication factor 1): 0
+	Badly Distributed Blocks: 0
+	Low redundancy blocks with highest priority to recover: 0
+	Pending deletion blocks: 0
+Erasure Coded Block Groups: 
+	Low redundancy block groups: 0
+	Block groups with corrupt internal blocks: 0
+	Missing block groups: 0
+	Badly Distributed Blocks: 0
+	Low redundancy blocks with highest priority to recover: 0
+	Pending deletion blocks: 0
+
+-------------------------------------------------
+Live datanodes (1):
+
+Name: 127.0.0.1:9866 (localhost)
+Hostname: lake
+Decommission Status : Normal
+Configured Capacity: 3341183287296 (3.04 TB)
+DFS Used: 8192 (8 KB)
+Non DFS Used: 2740875243520 (2.49 TB)
+DFS Remaining: 600308035584 (559.08 GB)
+DFS Used%: 0.00%
+DFS Remaining%: 17.97%
+Configured Cache Capacity: 0 (0 B)
+Cache Used: 0 (0 B)
+Cache Remaining: 0 (0 B)
+Cache Used%: 100.00%
+Cache Remaining%: 0.00%
+Xceivers: 0
+Last contact: Tue Nov 17 13:57:50 GMT 2026
+Last Block Report: Tue Nov 17 13:55:38 GMT 2026
+Num of Blocks: 0
+
+
+
+$ grep -c -E "ERROR|FATAL" $HADOOP_HOME/logs/*namenode*.log $HADOOP_HOME/logs/*datanode*.log
+/opt/hadoop/logs/hadoop-etudiant-namenode-lake.log:0
+/opt/hadoop/logs/hadoop-etudiant-datanode-lake.log:0
