@@ -1,0 +1,31 @@
+# Étape 10 – 2026-11-18 10:23:43 UTC – hôte lake – utilisateur etudiant
+
+$ api error
+GetFile UC04 -> STOPPED
+Input Directory réglé sur /data/nifi/absent
+GetFile UC04 -> RUNNING
+GetFile UC04 etat=STOPPED validation=INVALID
+validation: 'Input Directory' validated against '/data/nifi/absent' is invalid because Directory does not exist
+GetFile UC04 -> STOPPED
+
+$ api restore
+GetFile UC04 -> STOPPED
+Input Directory rétabli sur /data/nifi/input
+processeurs arrêtés, configuration d'origine rétablie
+
+$ api show
+PutHDFS UC04 etat=STOPPED type=PutHDFS
+  Hadoop Configuration Resources=/opt/hadoop/etc/hadoop/core-site.xml,/opt/hadoop/etc/hadoop/hdfs-site.xml
+  Directory=/retail-lake/raw/nifi
+  Conflict Resolution Strategy=fail
+GetFile UC04 etat=STOPPED type=GetFile
+  Input Directory=/data/nifi/input
+  Keep Source File=false
+  Recurse Subdirectories=false
+LogAttribute echec UC04 etat=STOPPED type=LogAttribute
+  Log Level=warn
+  Log Payload=false
+
+$ hdfs dfs -ls -h /retail-lake/raw/nifi
+Found 1 items
+-rw-r--r--   1 etudiant supergroup        327 2026-11-18 10:19 /retail-lake/raw/nifi/income_band.dat

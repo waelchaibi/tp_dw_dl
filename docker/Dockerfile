@@ -34,6 +34,7 @@ RUN wget -q https://downloads.apache.org/nifi/${NIFI_VERSION}/nifi-${NIFI_VERSIO
 
 COPY --chown=etudiant:etudiant core-site.xml hdfs-site.xml /opt/hadoop/etc/hadoop/
 COPY --chmod=755 entrypoint.sh /entrypoint.sh
+RUN sed -i 's/\r$//' /entrypoint.sh
 
 RUN mkdir -p /home/etudiant/hadoop-data/namenode /home/etudiant/hadoop-data/datanode \
              /data/nifi/input /data/nifi/archive /data/nifi/error \

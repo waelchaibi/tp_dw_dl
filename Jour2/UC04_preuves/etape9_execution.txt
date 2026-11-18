@@ -1,0 +1,42 @@
+# Étape 9 – 2026-11-18 10:19:51 UTC – hôte lake – utilisateur etudiant
+
+$ api start
+PutHDFS UC04 -> RUNNING
+LogAttribute echec UC04 -> RUNNING
+GetFile UC04 -> RUNNING
+
+$ api show
+PutHDFS UC04 etat=RUNNING type=PutHDFS
+  Hadoop Configuration Resources=/opt/hadoop/etc/hadoop/core-site.xml,/opt/hadoop/etc/hadoop/hdfs-site.xml
+  Directory=/retail-lake/raw/nifi
+  Conflict Resolution Strategy=fail
+GetFile UC04 etat=RUNNING type=GetFile
+  Input Directory=/data/nifi/input
+  Keep Source File=false
+  Recurse Subdirectories=false
+LogAttribute echec UC04 etat=RUNNING type=LogAttribute
+  Log Level=warn
+  Log Payload=false
+
+$ hdfs dfs -ls -h /retail-lake/raw/nifi
+Found 1 items
+-rw-r--r--   1 etudiant supergroup        327 2026-11-18 10:19 /retail-lake/raw/nifi/income_band.dat
+
+$ hdfs dfs -du -h /retail-lake/raw/nifi
+327  327  /retail-lake/raw/nifi/income_band.dat
+
+$ hdfs dfs -stat 'taille=%b replication=%r droits=%A proprietaire=%u' /retail-lake/raw/nifi/income_band.dat
+taille=327 replication=1 droits=rw-r--r-- proprietaire=etudiant
+
+$ sha256sum < /data/retail_project/data/income_band/income_band.dat
+7d8b1e18b6367edb8dc9374d9ef167df3af5c50e3556852c4a1e3ba7749dd5a4  -
+
+$ hdfs dfs -cat /retail-lake/raw/nifi/income_band.dat | sha256sum
+7d8b1e18b6367edb8dc9374d9ef167df3af5c50e3556852c4a1e3ba7749dd5a4  -
+
+$ ls -l /data/nifi/input/income_band.dat || echo 'copie de travail consommée par GetFile'
+ls: cannot access '/data/nifi/input/income_band.dat': No such file or directory
+copie de travail consommée par GetFile
+
+$ ls -l /data/retail_project/data/income_band/income_band.dat
+-rwxrwxrwx 1 root root 327 Nov 16 11:44 /data/retail_project/data/income_band/income_band.dat

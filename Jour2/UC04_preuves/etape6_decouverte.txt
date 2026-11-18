@@ -1,0 +1,31 @@
+# Étape 6 – 2026-11-18 10:17:02 UTC – hôte lake – utilisateur etudiant
+
+$ ls /opt/nifi/lib/nifi-api-*.jar /opt/nifi/lib/nifi-hadoop-nar-*.nar /opt/nifi/lib/nifi-hadoop-libraries-nar-*.nar
+/opt/nifi/lib/nifi-api-2.12.0.jar
+/opt/nifi/lib/nifi-hadoop-libraries-nar-2.12.0.nar
+/opt/nifi/lib/nifi-hadoop-nar-2.12.0.nar
+
+$ grep ^nifi.ui.banner.text= /opt/nifi/conf/nifi.properties || true
+nifi.ui.banner.text=
+
+$ grep -E "^nifi.web.https.port=|^nifi.web.https.host=" /opt/nifi/conf/nifi.properties
+nifi.web.https.host=0.0.0.0
+nifi.web.https.port=8443
+API NiFi joignable (HTTP 401)
+
+$ jps
+1 NiFi
+599 Jps
+158 DataNode
+95 NameNode
+
+$ curl -k -s -o /dev/null -w '%{http_code}' https://localhost:8443/nifi/
+200
+Interface : https://localhost:8443/nifi
+Identifiants générés au premier démarrage : présents dans le journal, non recopiés ici.
+
+$ grep -c "Generated Username" /opt/nifi/logs/nifi-app.log
+1
+
+$ grep -c "Started Application" /opt/nifi/logs/nifi-app.log
+1

@@ -1,0 +1,10 @@
+# Étape 11 – 2026-11-18 10:26:13 UTC – hôte lake – utilisateur etudiant
+
+$ api provenance
+11/18/2026 10:19:58.061 UTC DROP composant=PutHDFS UC04 flowfile=27315ace-4be8-4bdb-bdbe-ccfb479aa047 fichier=income_band.dat
+11/18/2026 10:19:58.061 UTC ATTRIBUTES_MODIFIED composant=PutHDFS UC04 flowfile=27315ace-4be8-4bdb-bdbe-ccfb479aa047 fichier=income_band.dat
+11/18/2026 10:19:58.059 UTC SEND composant=PutHDFS UC04 flowfile=27315ace-4be8-4bdb-bdbe-ccfb479aa047 fichier=income_band.dat
+11/18/2026 10:19:52.806 UTC RECEIVE composant=GetFile UC04 flowfile=27315ace-4be8-4bdb-bdbe-ccfb479aa047 fichier=income_band.dat
+
+La provenance relie l'identifiant du FlowFile, le nom du fichier et l'heure de chaque événement.
+RECEIVE correspond à la lecture locale, SEND au dépôt HDFS, ATTRIBUTES_MODIFIED aux attributs posés par PutHDFS, DROP à la fin du FlowFile.
