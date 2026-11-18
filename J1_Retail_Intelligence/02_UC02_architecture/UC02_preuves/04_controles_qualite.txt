@@ -1,0 +1,48 @@
+# Preuve 04 – Contrôles qualité – 2026-11-17 15:15
+
+## Part des lignes ayant au moins un champ vide, par table
+data/customer_address/customer_address.dat           lignes=49500     avec_vide=  0.1%  colonnes=13
+data/customer/customer.dat                           lignes=99000     avec_vide=  0.3%  colonnes=18
+data/customer_demographics/customer_demographics.dat lignes=1920800   avec_vide=  0.2%  colonnes=9
+data/date_dim/date_dim.dat                           lignes=109573    avec_vide=  0.0%  colonnes=28
+data/household_demographics/household_demographics.dat lignes=7200      avec_vide=  0.1%  colonnes=5
+data/income_band/income_band.dat                     lignes=20        avec_vide=  0.0%  colonnes=3
+data/inventory/inventory.dat                         lignes=23255100  avec_vide=  0.0%  colonnes=4
+data/item/item.dat                                   lignes=17820     avec_vide=100.0%  colonnes=22
+data/item_marketprices/item_marketprices.dat         lignes=89100     avec_vide=  0.0%  colonnes=6
+data/product_reviews/product_reviews.dat             lignes=89991     avec_vide=  0.0%  colonnes=8
+data/promotion/promotion.dat                         lignes=300       avec_vide=  0.3%  colonnes=19
+data/reason/reason.dat                               lignes=35        avec_vide=  0.0%  colonnes=3
+data/ship_mode/ship_mode.dat                         lignes=20        avec_vide=  0.0%  colonnes=6
+data/store_returns/store_returns.dat                 lignes=37902     avec_vide=  0.2%  colonnes=20
+data/store_sales/store_sales.dat                     lignes=667579    avec_vide=  0.2%  colonnes=23
+data/store/store.dat                                 lignes=12        avec_vide=100.0%  colonnes=29
+data/time_dim/time_dim.dat                           lignes=86400     avec_vide=  0.0%  colonnes=10
+data/warehouse/warehouse.dat                         lignes=5         avec_vide=  0.0%  colonnes=14
+data/web_clickstreams/web_clickstreams.dat           lignes=6770550   avec_vide= 90.1%  colonnes=6
+data/web_page/web_page.dat                           lignes=60        avec_vide=100.0%  colonnes=14
+data/web_returns/web_returns.dat                     lignes=38487     avec_vide=  0.4%  colonnes=24
+data/web_sales/web_sales.dat                         lignes=668052    avec_vide=  0.3%  colonnes=34
+data/web_site/web_site.dat                           lignes=30        avec_vide=100.0%  colonnes=26
+
+## Lignes strictement en double
+customer : 0
+item : 0
+store : 0
+store_sales : 0
+web_sales : 0
+store_returns : 0
+web_returns : 0
+product_reviews : 0
+
+## Produits de store_sales absents de item (colonne 3 contre clé de item)
+0 sur 667579 lignes
+
+## web_clickstreams : lignes sans identifiant de vente (colonne 3 vide)
+6102498 sur 6770550 lignes (90.1%)
+
+## store_sales : lignes dont la dernière colonne est négative
+495971 sur 667579 lignes (74.3%)
+
+## customer : colonnes personnelles présentes (positions 8 à 10 et 17 : civilité, prénom, nom, e-mail) – valeurs non reproduites
+18 colonnes

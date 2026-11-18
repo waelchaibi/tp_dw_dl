@@ -1,0 +1,35 @@
+# Preuve 03 – Formats et volumes du kit – 2026-11-17 15:15
+
+$ du -sh data data_refresh
+978M	data
+9.2M	data_refresh
+
+$ find data -type f | wc -l; find data_refresh -type f | wc -l
+24
+12
+
+$ du -sh data/* | sort -h | tail -6
+54M	data/product_reviews
+75M	data/customer_demographics
+89M	data/store_sales
+128M	data/web_sales
+171M	data/web_clickstreams
+406M	data/inventory
+
+$ wc -l data/inventory/inventory.dat data/web_clickstreams/web_clickstreams.dat data/web_sales/web_sales.dat data/store_sales/store_sales.dat
+ 23255100 data/inventory/inventory.dat
+  6770550 data/web_clickstreams/web_clickstreams.dat
+   668052 data/web_sales/web_sales.dat
+   667579 data/store_sales/store_sales.dat
+ 31361281 total
+
+$ head -n 2 data/store_sales/store_sales.dat
+36890|71480|10001|44404|493944|2898|44093|10|294|0|31|18.00|30.78|23.08|238.70|715.48|558.00|954.18|21.46|0.00|715.48|736.94|157.48
+36890|71480|10000|44404|493944|2898|44093|10|279|0|54|99.21|148.82|83.34|3535.92|4500.36|5357.34|8036.28|225.02|0.00|4500.36|4725.38|-856.98
+
+$ head -n 1 data/store_sales/store_sales.dat | awk -F'|' '{print NF " colonnes, séparateur |"}'
+23 colonnes, séparateur |
+
+$ head -n 2 data/item_marketprices/item_marketprices_audit.csv
+
+maxItems,realMaxItems,numCompetitors,minComPerITem,maxComPerItem,avgComPerItem,itemsWithoutCompetitors,itemsNotHavingMinCompetitors
