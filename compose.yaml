@@ -18,10 +18,13 @@ services:
       - nifi:/opt/nifi
       - ./retail_project:/data/retail_project:ro
       - ./notebooks:/home/etudiant/notebooks
+      - .:/opt/tp
+      - uv-cache:/home/etudiant/.cache/uv
     security_opt:
       - label=disable
     stop_grace_period: 60s
 
 volumes:
+  uv-cache:
   hadoop-data:
   nifi:
