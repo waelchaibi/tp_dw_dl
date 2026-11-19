@@ -4,11 +4,13 @@ version = "0.1.0"
 description = "Environnement Python du TP (Spark/PySpark, Jupyter, Parquet) - utilisé par le noyau Jupyter du conteneur"
 requires-python = ">=3.12,<3.13"
 dependencies = [
-    "pyspark==4.3.0",
+    "pyspark==4.1.4",  # 4.1.x : dernière version supportée par Iceberg
     "pyarrow>=17",
     "pandas>=2.2,<3",
     "jupyterlab>=4.2",
     "ipykernel>=6.29",
+    "matplotlib>=3.11.2",
+    "trino>=0.330",
 ]
 
 [tool.uv]

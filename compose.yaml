@@ -1,3 +1,8 @@
+x-s3-credentials: &s3-credentials
+  AWS_ACCESS_KEY_ID: ${MINIO_ROOT_USER:-minioadmin}
+  AWS_SECRET_ACCESS_KEY: ${MINIO_ROOT_PASSWORD:-minioadmin}
+  AWS_REGION: us-east-1
+
 services:
   lake:
     build:
@@ -6,6 +11,7 @@ services:
     image: retail-lake:tp2
     hostname: lake
     environment:
+      <<: *s3-credentials
       JUPYTER_TOKEN: ${JUPYTER_TOKEN:-tp}
     ports:
       - "127.0.0.1:9870:9870"
@@ -22,9 +28,75 @@ services:
       - uv-cache:/home/etudiant/.cache/uv
     security_opt:
       - label=disable
+    depends_on:
+      iceberg-rest:
+        condition: service_started
     stop_grace_period: 60s
+
+  minio:
+    image: pgsty/minio:RELEASE.2026-08-04T00-00-00Z
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    ports:
+      - "127.0.0.1:9000:9000"   # API S3
+      - "127.0.0.1:9001:9001"   # console web
+    volumes:
+      - minio-data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-fs", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      retries: 20
+
+  minio-init:
+    image: pgsty/mc:RELEASE.2026-11-12T00-00-00Z
+    depends_on:
+      minio:
+        condition: service_healthy
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    entrypoint: >
+      /bin/sh -c "
+      mc alias set local http://minio:9000 $$MINIO_ROOT_USER $$MINIO_ROOT_PASSWORD &&
+      mc mb --ignore-existing local/warehouse
+      "
+    restart: "no"
+
+  iceberg-rest:
+    image: apache/iceberg-rest-fixture:1.10.1
+    environment:
+      <<: *s3-credentials
+      CATALOG_URI: jdbc:sqlite:file:/home/iceberg/iceberg_catalog.db
+      CATALOG_JDBC_USER: user
+      CATALOG_JDBC_PASSWORD: password
+      CATALOG_WAREHOUSE: s3://warehouse/
+      CATALOG_IO__IMPL: org.apache.iceberg.aws.s3.S3FileIO
+      CATALOG_S3_ENDPOINT: http://minio:9000
+      CATALOG_S3_PATH__STYLE__ACCESS: "true"
+    ports:
+      - "127.0.0.1:8181:8181"
+    volumes:
+      - iceberg-catalog:/home/iceberg
+    depends_on:
+      minio-init:
+        condition: service_completed_successfully
+  trino:
+    image: trinodb/trino:484
+    environment:
+      <<: *s3-credentials
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - ./docker/trino/catalog/iceberg.properties:/etc/trino/catalog/iceberg.properties:ro
+    depends_on:
+      iceberg-rest:
+        condition: service_started
 
 volumes:
   uv-cache:
   hadoop-data:
   nifi:
+  minio-data:
+  iceberg-catalog:

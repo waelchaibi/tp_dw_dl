@@ -1,19 +1,20 @@
 ARG HADOOP_VERSION=3.5.0
 ARG NIFI_VERSION=2.12.0
+ARG ICEBERG_VERSION=1.12.0
+ARG ICEBERG_SPARK=4.1_2.13
 
-FROM alpine:3 AS hadoop
+FROM alpine:3.24.4 AS hadoop
 ARG HADOOP_VERSION
 RUN apk add --no-cache tar \
     && wget -qO- https://downloads.apache.org/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz \
        | tar -xz -C /opt \
     && mv /opt/hadoop-${HADOOP_VERSION} /opt/hadoop \
-    # seul HDFS sert : doc, outils (SDK AWS…), YARN, MapReduce, client shadé et libs statiques retirés (~1 Go)
     && rm -rf /opt/hadoop/share/doc /opt/hadoop/share/hadoop/tools /opt/hadoop/share/hadoop/yarn \
               /opt/hadoop/share/hadoop/mapreduce /opt/hadoop/share/hadoop/client \
     && find /opt/hadoop/lib/native -name "*.a" -delete \
     && echo "export JAVA_HOME=/opt/java/17" >> /opt/hadoop/etc/hadoop/hadoop-env.sh
 
-FROM alpine:3 AS nifi
+FROM alpine:3.24.4 AS nifi
 ARG NIFI_VERSION
 RUN apk add --no-cache unzip \
     && wget -q https://downloads.apache.org/nifi/${NIFI_VERSION}/nifi-${NIFI_VERSION}-bin.zip -O /tmp/nifi.zip \
@@ -24,6 +25,15 @@ RUN apk add --no-cache unzip \
        done \
     && sed -i -e 's|^nifi.web.https.host=.*|nifi.web.https.host=0.0.0.0|' \
               -e 's|^nifi.web.proxy.host=.*|nifi.web.proxy.host=localhost:8443|' /opt/nifi/conf/nifi.properties
+
+FROM alpine:3.24.4 AS iceberg
+ARG ICEBERG_VERSION
+ARG ICEBERG_SPARK
+RUN mkdir -p /opt/iceberg/jars && cd /opt/iceberg/jars \
+    && wget -q -O iceberg-spark-runtime.jar \
+       https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-spark-runtime-${ICEBERG_SPARK}/${ICEBERG_VERSION}/iceberg-spark-runtime-${ICEBERG_SPARK}-${ICEBERG_VERSION}.jar \
+    && wget -q -O iceberg-aws-bundle.jar \
+       https://repo1.maven.org/maven2/org/apache/iceberg/iceberg-aws-bundle/${ICEBERG_VERSION}/iceberg-aws-bundle-${ICEBERG_VERSION}.jar
 
 FROM python:3.12-slim
 
@@ -42,6 +52,8 @@ COPY --from=eclipse-temurin:21-jre /opt/java/openjdk /opt/java/21
 COPY --from=ghcr.io/astral-sh/uv:0.13.9 /uv /uvx /usr/local/bin/
 COPY --from=hadoop --chown=1000:1000 /opt/hadoop /opt/hadoop
 COPY --from=nifi   --chown=1000:1000 /opt/nifi   /opt/nifi
+COPY --from=iceberg /opt/iceberg /opt/iceberg
+COPY docker/spark/spark-defaults.conf /opt/spark-conf/spark-defaults.conf
 
 ENV JAVA_HOME=/opt/java/17 \
     JAVA_HOME_HADOOP=/opt/java/17 \
@@ -51,6 +63,7 @@ ENV JAVA_HOME=/opt/java/17 \
     HADOOP_YARN_HOME=/opt/hadoop \
     HADOOP_MAPRED_HOME=/opt/hadoop \
     SPARK_HOME=/opt/venv/lib/python3.12/site-packages/pyspark \
+    SPARK_CONF_DIR=/opt/spark-conf \
     VIRTUAL_ENV=/opt/venv \
     PYSPARK_PYTHON=/opt/venv/bin/python \
     UV_PROJECT=/opt/tp \
