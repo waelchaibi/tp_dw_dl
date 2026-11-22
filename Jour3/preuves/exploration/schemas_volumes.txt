@@ -1,0 +1,141 @@
+# Largeur, lignes, octets, schémas texte, échantillons
+# Source : notebooks/uc06_exploration.ipynb, cellule(s) 3, 5 (sorties enregistrées)
+
+## cellule 3 – code
+VENTES = "/data/retail_project/data/store_sales/store_sales.dat"
+PRODUITS = "/data/retail_project/data/item/item.dat"
+
+VENTES_NOMS = [
+    "ss_sold_date_sk", "ss_sold_time_sk", "ss_item_sk", "ss_customer_sk",
+    "ss_cdemo_sk", "ss_hdemo_sk", "ss_addr_sk", "ss_store_sk", "ss_promo_sk",
+    "ss_ticket_number", "ss_quantity", "ss_wholesale_cost", "ss_list_price",
+    "ss_sales_price", "ss_ext_discount_amt", "ss_ext_sales_price",
+    "ss_ext_wholesale_cost", "ss_ext_list_price", "ss_ext_tax", "ss_coupon_amt",
+    "ss_net_paid", "ss_net_paid_inc_tax", "ss_net_profit",
+]
+PRODUITS_NOMS = [
+    "i_item_sk", "i_item_id", "i_rec_start_date", "i_rec_end_date", "i_item_desc",
+    "i_current_price", "i_wholesale_cost", "i_brand_id", "i_brand", "i_class_id",
+    "i_class", "i_category_id", "i_category", "i_manufact_id", "i_manufact",
+    "i_size", "i_formulation", "i_color", "i_units", "i_container",
+    "i_manager_id", "i_product_name",
+]
+
+def lire_brut(chemin):
+    return (
+        spark.read
+        .option("sep", "|")
+        .option("header", False)
+        .option("quote", "\u0000")
+        .option("escape", "\u0000")
+        .csv(chemin)
+    )
+
+def lignes_fichier(chemin):
+    total = 0
+    with open(chemin, "rb") as fichier:
+        for _ in fichier:
+            total += 1
+    return total
+
+sources = {"store_sales": (VENTES, VENTES_NOMS), "item": (PRODUITS, PRODUITS_NOMS)}
+frames = {}
+for nom, (chemin, colonnes) in sources.items():
+    brut = lire_brut("file://" + chemin)
+    largeur = len(brut.columns)
+    print(f"{nom} : largeur observée {largeur}, largeur du schéma {len(colonnes)}")
+    if largeur != len(colonnes):
+        raise SystemExit(f"{nom} : largeur différente, noms de la spécification non appliqués")
+    frames[nom] = brut.toDF(*colonnes).persist()
+    print(nom, "lignes fichier", lignes_fichier(chemin), "lignes spark", frames[nom].count())
+    print(nom, "octets", os.path.getsize(chemin))
+
+## cellule 3 – sortie
+store_sales : largeur observée 23, largeur du schéma 23
+store_sales lignes fichier 667579 lignes spark 667579
+store_sales octets 92764700
+item : largeur observée 22, largeur du schéma 22
+item lignes fichier 17820 lignes spark 17820
+item octets 6799286
+
+## cellule 5 – code
+for nom, df in frames.items():
+    print("====", nom)
+    df.printSchema()
+    df.show(5, truncate=False)
+    print("colonnes", len(df.columns), "lignes", df.count())
+
+## cellule 5 – sortie
+==== store_sales
+root
+ |-- ss_sold_date_sk: string (nullable = true)
+ |-- ss_sold_time_sk: string (nullable = true)
+ |-- ss_item_sk: string (nullable = true)
+ |-- ss_customer_sk: string (nullable = true)
+ |-- ss_cdemo_sk: string (nullable = true)
+ |-- ss_hdemo_sk: string (nullable = true)
+ |-- ss_addr_sk: string (nullable = true)
+ |-- ss_store_sk: string (nullable = true)
+ |-- ss_promo_sk: string (nullable = true)
+ |-- ss_ticket_number: string (nullable = true)
+ |-- ss_quantity: string (nullable = true)
+ |-- ss_wholesale_cost: string (nullable = true)
+ |-- ss_list_price: string (nullable = true)
+ |-- ss_sales_price: string (nullable = true)
+ |-- ss_ext_discount_amt: string (nullable = true)
+ |-- ss_ext_sales_price: string (nullable = true)
+ |-- ss_ext_wholesale_cost: string (nullable = true)
+ |-- ss_ext_list_price: string (nullable = true)
+ |-- ss_ext_tax: string (nullable = true)
+ |-- ss_coupon_amt: string (nullable = true)
+ |-- ss_net_paid: string (nullable = true)
+ |-- ss_net_paid_inc_tax: string (nullable = true)
+ |-- ss_net_profit: string (nullable = true)
+
++---------------+---------------+----------+--------------+-----------+-----------+----------+-----------+-----------+----------------+-----------+-----------------+-------------+--------------+-------------------+------------------+---------------------+-----------------+----------+-------------+-----------+-------------------+-------------+
+|ss_sold_date_sk|ss_sold_time_sk|ss_item_sk|ss_customer_sk|ss_cdemo_sk|ss_hdemo_sk|ss_addr_sk|ss_store_sk|ss_promo_sk|ss_ticket_number|ss_quantity|ss_wholesale_cost|ss_list_price|ss_sales_price|ss_ext_discount_amt|ss_ext_sales_price|ss_ext_wholesale_cost|ss_ext_list_price|ss_ext_tax|ss_coupon_amt|ss_net_paid|ss_net_paid_inc_tax|ss_net_profit|
++---------------+---------------+----------+--------------+-----------+-----------+----------+-----------+-----------+----------------+-----------+-----------------+-------------+--------------+-------------------+------------------+---------------------+-----------------+----------+-------------+-----------+-------------------+-------------+
+|36890          |71480          |10001     |44404         |493944     |2898       |44093     |10         |294        |0               |31         |18.00            |30.78        |23.08         |238.70             |715.48            |558.00               |954.18           |21.46     |0.00         |715.48     |736.94             |157.48       |
+|36890          |71480          |10000     |44404         |493944     |2898       |44093     |10         |279        |0               |54         |99.21            |148.82       |83.34         |3535.92            |4500.36           |5357.34              |8036.28          |225.02    |0.00         |4500.36    |4725.38            |-856.98      |
+|36890          |71480          |15556     |44404         |493944     |2898       |44093     |10         |114        |0               |39         |79.49            |94.59        |83.24         |442.65             |3246.36           |3100.11              |3689.01          |184.07    |616.81       |2629.55    |2813.62            |-470.56      |
+|36890          |45392          |4597      |89832         |1774847    |6266       |16285     |4          |285        |1               |20         |74.38            |136.12       |133.40        |54.40              |2668.00           |1487.60              |2722.40          |133.40    |0.00         |2668.00    |2801.40            |1180.40      |
+|36890          |45392          |3258      |89832         |1774847    |6266       |16285     |4          |230        |1               |76         |9.83             |14.45        |11.85         |197.60             |900.60            |747.08               |1098.20          |18.01     |0.00         |900.60     |918.61             |153.52       |
++---------------+---------------+----------+--------------+-----------+-----------+----------+-----------+-----------+----------------+-----------+-----------------+-------------+--------------+-------------------+------------------+---------------------+-----------------+----------+-------------+-----------+-------------------+-------------+
+only showing top 5 rows
+colonnes 23 lignes 667579
+==== item
+root
+ |-- i_item_sk: string (nullable = true)
+ |-- i_item_id: string (nullable = true)
+ |-- i_rec_start_date: string (nullable = true)
+ |-- i_rec_end_date: string (nullable = true)
+ |-- i_item_desc: string (nullable = true)
+ |-- i_current_price: string (nullable = true)
+ |-- i_wholesale_cost: string (nullable = true)
+ |-- i_brand_id: string (nullable = true)
+ |-- i_brand: string (nullable = true)
+ |-- i_class_id: string (nullable = true)
+ |-- i_class: string (nullable = true)
+ |-- i_category_id: string (nullable = true)
+ |-- i_category: string (nullable = true)
+ |-- i_manufact_id: string (nullable = true)
+ |-- i_manufact: string (nullable = true)
+ |-- i_size: string (nullable = true)
+ |-- i_formulation: string (nullable = true)
+ |-- i_color: string (nullable = true)
+ |-- i_units: string (nullable = true)
+ |-- i_container: string (nullable = true)
+ |-- i_manager_id: string (nullable = true)
+ |-- i_product_name: string (nullable = true)
+
++---------+----------------+----------------+--------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------+----------------+----------+---------------------------------+----------+---------------------+-------------+-----------------+-------------+--------------------------------------------------+------+--------------------+--------+-------+-----------+------------+------------------------------------------------+
+|i_item_sk|i_item_id       |i_rec_start_date|i_rec_end_date|i_item_desc                                                                                                                                                                                        |i_current_price|i_wholesale_cost|i_brand_id|i_brand                          |i_class_id|i_class              |i_category_id|i_category       |i_manufact_id|i_manufact                                        |i_size|i_formulation       |i_color |i_units|i_container|i_manager_id|i_product_name                                  |
++---------+----------------+----------------+--------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------+----------------+----------+---------------------------------+----------+---------------------+-------------+-----------------+-------------+--------------------------------------------------+------+--------------------+--------+-------+-----------+------------+------------------------------------------------+
+|0        |AAAAAAAAAAAAAAAA|2000-01-14      |NULL          |quickly even dinos beneath the frays must have to boost boldly careful bold escapades: stealthily even forges over the dependencies integrate always past the quiet sly decoys-- notornis sol      |72.29          |64.96           |3898712   |71TS7NSbvH1YbdiQMG6ttBHKAljiNoIRB|1         |Fan Shop             |9            |Sports & Outdoors|995          |2VOxvrIWwlJQTSk6                                  |small |99Ee1r6uFbZSSClAX3  |dodger  |Oz     |Unknown    |18          |8m9n5Q7T33DNWidoA6nWlg6ydmpA1SKOoOJLXiLVb       |
+|1        |AAAAAAAAAAAAAAAB|2000-09-23      |NULL          |quietly quiet hockey players outside the furiously fluffy sauternes impress daringly silently quiet gifts? bold ruthless escapades run slyly epitaphs! warhorses of the carefull                   |95.67          |30.57           |2218494   |qNBimHGBu763udH                  |4         |New                  |3            |Books            |69           |M0VWtUYYkxy6iEMa2XZOxQSCTxFrOqsXg                 |petite|dz1S8VrTflBJIq1kC61 |tan     |Dram   |Unknown    |91          |CPB648WB37uUv5OCqjzYe7rH3T                      |
+|2        |AAAAAAAAAAAAAAAC|2000-09-01      |NULL          |dogged dugouts need to maintain regularly in place of the furiously brave dinos! dugouts poach stealthily final escapades? sauternes will have to wake! tithes can use slowly until the frets. stea|62.74          |47.70           |6043423   |ma5                              |3         |Education & Reference|3            |Books            |831          |SXEWAxq6kTcO8sAwISBAM9                            |N/A   |nF9XEmsyODYrRYXE2P8H|mint    |Bunch  |Unknown    |19          |bMcWnXWH4yWhqADKdlZicQXcIhd48e8iROsScTzHAKPFcgh8|
+|3        |AAAAAAAAAAAAAAAD|2000-12-12      |NULL          |ideas within the quiet sly asymptotes maintain furious furious notornis. ruthless frets during the daring dinos snooze permanent brave somas. thinly ironic warthogs should snooze quiet           |98.67          |76.61           |7023779   |op9d25ZWK4zQ7JNAc                |3         |Education & Reference|3            |Books            |289          |GJG7sd2NX3jWQ75hZnibJ9PpCpdnish8TWzGw2x8jv        |petite|DO8ImgmTbjXFBHux    |pink    |Case   |Unknown    |99          |gqbhNi4JCS7                                     |
+|4        |AAAAAAAAAAAAAAAE|2000-04-04      |NULL          |permanent careful notornis engage inside the sheaves-- ironic final realms integrate? dogged ironic gifts need to unwind bravely bold warthogs-- dogged somas ought to thrash platelets-- b        |40.95          |82.68           |5087894   |RYLn4HY3I3kooPCNhwV              |2         |NO_SUB_CAT           |3            |Books            |511          |x83t3sgzXqyvPSbg8eTcyBXWAYNeak7EvFJVBMP4lB3Q2WBDMv|large |tOrdc4PMUMrwZto1eZdL|blanched|Dram   |Unknown    |54          |WinA                                            |
++---------+----------------+----------------+--------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------+----------------+----------+---------------------------------+----------+---------------------+-------------+-----------------+-------------+--------------------------------------------------+------+--------------------+--------+-------+-----------+------------+------------------------------------------------+
+only showing top 5 rows
+colonnes 22 lignes 17820

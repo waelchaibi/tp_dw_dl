@@ -1,0 +1,108 @@
+# Schéma typé, lignes écartées, doublons, profits négatifs
+# Source : notebooks/uc06_silver_gold.ipynb, cellule(s) 3 (sorties enregistrées)
+
+## cellule 3 – code
+ventes_brutes = lire(VENTES, SCHEMA_VENTES)
+produits_bruts = lire(PRODUITS, SCHEMA_PRODUITS)
+
+print("ventes : lignes fichier", lignes_fichier(VENTES), "lignes lues", ventes_brutes.count())
+print("produits : lignes fichier", lignes_fichier(PRODUITS), "lignes lues", produits_bruts.count())
+ventes_brutes.printSchema()
+produits_bruts.printSchema()
+
+clefs_vente = ["ss_sold_date_sk", "ss_item_sk", "ss_store_sk", "ss_ticket_number", "ss_quantity", "ss_net_paid"]
+masque_ecart = F.col("ss_quantity").isNull() | (F.col("ss_quantity") <= 0)
+for clef in clefs_vente:
+    if clef != "ss_quantity":
+        masque_ecart = masque_ecart | F.col(clef).isNull()
+
+ventes_ecartees = ventes_brutes.filter(masque_ecart)
+ventes = ventes_brutes.filter(~masque_ecart)
+nb_avant = ventes.count()
+ventes = ventes.dropDuplicates()
+nb_doublons = nb_avant - ventes.count()
+print("ventes écartées", ventes_ecartees.count())
+print("doublons exacts retirés", nb_doublons)
+print("profits négatifs conservés", ventes.filter(F.col("ss_net_profit") < 0).count())
+
+produits_ecartes = produits_bruts.filter(F.col("i_item_sk").isNull() | F.col("i_item_id").isNull())
+produits = produits_bruts.filter(F.col("i_item_sk").isNotNull() & F.col("i_item_id").isNotNull())
+nb_avant_produits = produits.count()
+produits = produits.dropDuplicates(["i_item_sk"])
+print("produits écartés", produits_ecartes.count())
+print("i_item_sk en double retirés", nb_avant_produits - produits.count())
+print("i_rec_end_date vides", produits.filter(F.col("i_rec_end_date").isNull()).count())
+
+ventes = (
+    ventes
+    .withColumn("source_fichier", F.lit(VENTES))
+    .withColumn("source_lot", F.lit("initial"))
+)
+produits = (
+    produits
+    .withColumn("source_fichier", F.lit(PRODUITS))
+    .withColumn("source_lot", F.lit("initial"))
+)
+ventes = ventes.persist()
+produits = produits.persist()
+print("silver ventes", ventes.count(), "silver produits", produits.count())
+
+## cellule 3 – sortie
+ventes : lignes fichier 667579 lignes lues 667579
+produits : lignes fichier 17820 lignes lues 17820
+root
+ |-- ss_sold_date_sk: long (nullable = true)
+ |-- ss_sold_time_sk: long (nullable = true)
+ |-- ss_item_sk: long (nullable = true)
+ |-- ss_customer_sk: long (nullable = true)
+ |-- ss_cdemo_sk: long (nullable = true)
+ |-- ss_hdemo_sk: long (nullable = true)
+ |-- ss_addr_sk: long (nullable = true)
+ |-- ss_store_sk: long (nullable = true)
+ |-- ss_promo_sk: long (nullable = true)
+ |-- ss_ticket_number: long (nullable = true)
+ |-- ss_quantity: integer (nullable = true)
+ |-- ss_wholesale_cost: decimal(7,2) (nullable = true)
+ |-- ss_list_price: decimal(7,2) (nullable = true)
+ |-- ss_sales_price: decimal(7,2) (nullable = true)
+ |-- ss_ext_discount_amt: decimal(7,2) (nullable = true)
+ |-- ss_ext_sales_price: decimal(7,2) (nullable = true)
+ |-- ss_ext_wholesale_cost: decimal(7,2) (nullable = true)
+ |-- ss_ext_list_price: decimal(7,2) (nullable = true)
+ |-- ss_ext_tax: decimal(7,2) (nullable = true)
+ |-- ss_coupon_amt: decimal(7,2) (nullable = true)
+ |-- ss_net_paid: decimal(7,2) (nullable = true)
+ |-- ss_net_paid_inc_tax: decimal(7,2) (nullable = true)
+ |-- ss_net_profit: decimal(7,2) (nullable = true)
+
+root
+ |-- i_item_sk: long (nullable = true)
+ |-- i_item_id: string (nullable = true)
+ |-- i_rec_start_date: date (nullable = true)
+ |-- i_rec_end_date: date (nullable = true)
+ |-- i_item_desc: string (nullable = true)
+ |-- i_current_price: decimal(7,2) (nullable = true)
+ |-- i_wholesale_cost: decimal(7,2) (nullable = true)
+ |-- i_brand_id: long (nullable = true)
+ |-- i_brand: string (nullable = true)
+ |-- i_class_id: integer (nullable = true)
+ |-- i_class: string (nullable = true)
+ |-- i_category_id: integer (nullable = true)
+ |-- i_category: string (nullable = true)
+ |-- i_manufact_id: long (nullable = true)
+ |-- i_manufact: string (nullable = true)
+ |-- i_size: string (nullable = true)
+ |-- i_formulation: string (nullable = true)
+ |-- i_color: string (nullable = true)
+ |-- i_units: string (nullable = true)
+ |-- i_container: string (nullable = true)
+ |-- i_manager_id: long (nullable = true)
+ |-- i_product_name: string (nullable = true)
+
+ventes écartées 0
+doublons exacts retirés 0
+profits négatifs conservés 495971
+produits écartés 0
+i_item_sk en double retirés 0
+i_rec_end_date vides 17820
+silver ventes 667579 silver produits 17820

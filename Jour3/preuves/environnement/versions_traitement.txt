@@ -1,0 +1,111 @@
+# Versions, defaultFS HDFS, chemins d'entrée et de sortie
+# Source : notebooks/uc06_silver_gold.ipynb, cellule(s) 1 (sorties enregistrées)
+
+## cellule 1 – code
+import os
+import subprocess
+import sys
+
+from pyspark.sql import SparkSession
+from pyspark.sql import functions as F
+from pyspark.sql.types import DateType, DecimalType, IntegerType, LongType, StringType, StructField, StructType
+
+spark = (
+    SparkSession.builder
+    .appName("UC06-silver-gold")
+    .master("local[*]")
+    .config("spark.hadoop.fs.defaultFS", "hdfs://localhost:9000")
+    .config("spark.ui.showConsoleProgress", "false")
+    .getOrCreate()
+)
+spark.sparkContext.setLogLevel("ERROR")
+
+VENTES = "/data/retail_project/data/store_sales/store_sales.dat"
+PRODUITS = "/data/retail_project/data/item/item.dat"
+SILVER_VENTES = "/retail-lake/silver/uc06/store_sales"
+SILVER_PRODUITS = "/retail-lake/silver/uc06/item"
+GOLD = "/retail-lake/gold/uc06/ventes_magasin_par_produit"
+CSV_COMPARAISON = "/retail-lake/tmp/uc06/ventes_magasin_par_produit_csv"
+
+MONTANT = DecimalType(7, 2)
+LECTURE = {"sep": "|", "header": False, "quote": "\u0000", "escape": "\u0000", "mode": "PERMISSIVE"}
+
+SCHEMA_VENTES = StructType([
+    StructField("ss_sold_date_sk", LongType()),
+    StructField("ss_sold_time_sk", LongType()),
+    StructField("ss_item_sk", LongType()),
+    StructField("ss_customer_sk", LongType()),
+    StructField("ss_cdemo_sk", LongType()),
+    StructField("ss_hdemo_sk", LongType()),
+    StructField("ss_addr_sk", LongType()),
+    StructField("ss_store_sk", LongType()),
+    StructField("ss_promo_sk", LongType()),
+    StructField("ss_ticket_number", LongType()),
+    StructField("ss_quantity", IntegerType()),
+    StructField("ss_wholesale_cost", MONTANT),
+    StructField("ss_list_price", MONTANT),
+    StructField("ss_sales_price", MONTANT),
+    StructField("ss_ext_discount_amt", MONTANT),
+    StructField("ss_ext_sales_price", MONTANT),
+    StructField("ss_ext_wholesale_cost", MONTANT),
+    StructField("ss_ext_list_price", MONTANT),
+    StructField("ss_ext_tax", MONTANT),
+    StructField("ss_coupon_amt", MONTANT),
+    StructField("ss_net_paid", MONTANT),
+    StructField("ss_net_paid_inc_tax", MONTANT),
+    StructField("ss_net_profit", MONTANT),
+])
+SCHEMA_PRODUITS = StructType([
+    StructField("i_item_sk", LongType()),
+    StructField("i_item_id", StringType()),
+    StructField("i_rec_start_date", DateType()),
+    StructField("i_rec_end_date", DateType()),
+    StructField("i_item_desc", StringType()),
+    StructField("i_current_price", MONTANT),
+    StructField("i_wholesale_cost", MONTANT),
+    StructField("i_brand_id", LongType()),
+    StructField("i_brand", StringType()),
+    StructField("i_class_id", IntegerType()),
+    StructField("i_class", StringType()),
+    StructField("i_category_id", IntegerType()),
+    StructField("i_category", StringType()),
+    StructField("i_manufact_id", LongType()),
+    StructField("i_manufact", StringType()),
+    StructField("i_size", StringType()),
+    StructField("i_formulation", StringType()),
+    StructField("i_color", StringType()),
+    StructField("i_units", StringType()),
+    StructField("i_container", StringType()),
+    StructField("i_manager_id", LongType()),
+    StructField("i_product_name", StringType()),
+])
+
+def lire(chemin, schema):
+    lecture = spark.read.options(**LECTURE).schema(schema)
+    return lecture.csv("file://" + chemin)
+
+def lignes_fichier(chemin):
+    total = 0
+    with open(chemin, "rb") as fichier:
+        for _ in fichier:
+            total += 1
+    return total
+
+def octets_hdfs(chemin):
+    sortie = subprocess.check_output(["hdfs", "dfs", "-du", "-s", chemin], text=True).strip()
+    return int(sortie.split()[0]), sortie
+
+print("Python", sys.version.split()[0])
+print("Spark", spark.version)
+print("mode", spark.sparkContext.master)
+print("defaultFS", spark.conf.get("spark.hadoop.fs.defaultFS"))
+print("entrées", VENTES, PRODUITS)
+print("sorties", SILVER_VENTES, SILVER_PRODUITS, GOLD)
+
+## cellule 1 – sortie
+Python 3.12.3
+Spark 4.3.0
+mode local[*]
+defaultFS hdfs://localhost:9000
+entrées /data/retail_project/data/store_sales/store_sales.dat /data/retail_project/data/item/item.dat
+sorties /retail-lake/silver/uc06/store_sales /retail-lake/silver/uc06/item /retail-lake/gold/uc06/ventes_magasin_par_produit

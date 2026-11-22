@@ -1,0 +1,38 @@
+# Agrégation Gold par produit
+# Source : notebooks/uc06_silver_gold.ipynb, cellule(s) 7 (sorties enregistrées)
+
+## cellule 7 – code
+gold = (
+    enrichi.groupBy("i_item_sk", "i_item_id", "i_product_name", "i_category", "i_class")
+    .agg(
+        F.count("*").alias("nb_lignes"),
+        F.sum("ss_quantity").alias("quantite"),
+        F.sum("ss_net_paid").alias("ca_net"),
+        F.sum("ss_net_paid_inc_tax").alias("ca_net_ttc"),
+        F.sum("ss_net_profit").alias("profit_net"),
+    )
+)
+print("produits dans le gold", gold.count())
+print("lignes de vente couvertes", gold.agg(F.sum("nb_lignes")).collect()[0][0])
+print("ca_net total", gold.agg(F.sum("ca_net")).collect()[0][0])
+gold.orderBy(F.col("ca_net").desc()).show(10, truncate=False)
+
+## cellule 7 – sortie
+produits dans le gold 17820
+lignes de vente couvertes 667579
+ca_net total 1150529586.37
++---------+----------------+-------------------------------------------------+----------------------+--------------------------+---------+--------+-----------+-----------+-----------+
+|i_item_sk|i_item_id       |i_product_name                                   |i_category            |i_class                   |nb_lignes|quantite|ca_net     |ca_net_ttc |profit_net |
++---------+----------------+-------------------------------------------------+----------------------+--------------------------+---------+--------+-----------+-----------+-----------+
+|10000    |AAAAAAAAAAAAAOUQ|vwPR6l3UPyCIv5bljZbIG9k9YHLajogyqKbd6            |Home & Kitchen        |Kitchen Utensils & Gadgets|9029     |454954  |15408393.55|16108841.77|-7521122.26|
+|10003    |AAAAAAAAAAAAAOUT|Z2kc                                             |Electronics           |Computer Accessories      |8761     |439086  |14933870.10|15614283.97|-7411910.29|
+|10001    |AAAAAAAAAAAAAOUR|6VxbaI6thqY49zO                                  |Music                 |R&B                       |8269     |420138  |14572124.66|15240549.34|-6753145.81|
+|10002    |AAAAAAAAAAAAAOUS|bwTLbeGP8aT6bW7YjgxmDJuCUTlwG1Fz78VewSCYQULiop   |Music                 |Alternative Rock          |7505     |377027  |12817437.86|13397798.56|-6147236.12|
+|17502    |AAAAAAAAAAAAAZXE|HUpD                                             |Books                 |New                       |1878     |94625   |3336529.83 |3482713.49 |-1567515.15|
+|10579    |AAAAAAAAAAAAAPQX|LlFpTY3OX6EOhNjNssIJxlayUcuh                     |Music                 |Rock                      |1767     |91179   |3250367.57 |3393119.85 |-1476678.74|
+|8601     |AAAAAAAAAAAAAMSV|Qgphkd7Y                                         |Clothing & Accessories|Women                     |1761     |89600   |3238749.92 |3381167.60 |-1325909.43|
+|5618     |AAAAAAAAAAAAAIIC|c4v1x8aCv1KWxIhOcPY3LimEiLB                      |Music                 |Rock                      |1867     |95677   |3212955.42 |3355977.13 |-1552493.09|
+|2651     |AAAAAAAAAAAAADXZ|lJ5jtlBpY9Uj13h4v0x48kO9CQliylWzHnn6Hc73Kvi15jtG |Music                 |World Music               |1730     |88936   |3172287.79 |3306828.60 |-1351575.09|
+|16513    |AAAAAAAAAAAAAYLD|I669eBdhzmKpf93OoII6M0kCNYEzNsABm1FK2elIJLmi7Sjw3|Music                 |World Music               |1817     |91710   |3162636.37 |3297977.63 |-1503870.54|
++---------+----------------+-------------------------------------------------+----------------------+--------------------------+---------+--------+-----------+-----------+-----------+
+only showing top 10 rows

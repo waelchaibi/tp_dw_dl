@@ -1,0 +1,88 @@
+# Bilan des 9 contrôles qualité
+# Source : notebooks/uc06_silver_gold.ipynb, cellule(s) 13 (sorties enregistrées)
+
+## cellule 13 – code
+relu_ventes = spark.read.parquet(SILVER_VENTES)
+relu_produits = spark.read.parquet(SILVER_PRODUITS)
+relu_gold = spark.read.parquet(GOLD)
+
+controles = []
+
+def ajouter(nom, regle, valeur, ok):
+    controles.append((nom, regle, str(valeur), "OK" if ok else "ECART"))
+
+ajouter(
+    "Volume ventes",
+    "Lignes Silver = lignes du fichier, si rien n'est écarté",
+    f"{relu_ventes.count()} / {lignes_fichier(VENTES)}",
+    relu_ventes.count() == lignes_fichier(VENTES),
+)
+ajouter(
+    "Volume produits",
+    "Lignes Silver = lignes du fichier, si rien n'est écarté",
+    f"{relu_produits.count()} / {lignes_fichier(PRODUITS)}",
+    relu_produits.count() == lignes_fichier(PRODUITS),
+)
+ajouter(
+    "Complétude vente",
+    "Date, article, magasin, ticket, quantité et montant net non nuls",
+    ventes_ecartees.count(),
+    ventes_ecartees.count() == 0,
+)
+ajouter(
+    "Unicité produit",
+    "i_item_sk unique dans Silver item",
+    relu_produits.count() - relu_produits.select("i_item_sk").distinct().count(),
+    relu_produits.count() == relu_produits.select("i_item_sk").distinct().count(),
+)
+ajouter(
+    "Validité quantité",
+    "ss_quantity > 0",
+    relu_ventes.filter(F.col("ss_quantity") <= 0).count(),
+    relu_ventes.filter(F.col("ss_quantity") <= 0).count() == 0,
+)
+ajouter(
+    "Validité montant",
+    "ss_net_paid non nul",
+    relu_ventes.filter(F.col("ss_net_paid").isNull()).count(),
+    relu_ventes.filter(F.col("ss_net_paid").isNull()).count() == 0,
+)
+ajouter(
+    "Intégrité article",
+    "Chaque ss_item_sk trouve un i_item_sk",
+    orphelins,
+    orphelins == 0 and lignes_apres == lignes_avant,
+)
+ajouter(
+    "Cohérence gold",
+    "La somme des lignes Gold égale les lignes de vente jointes",
+    relu_gold.agg(F.sum("nb_lignes")).collect()[0][0],
+    relu_gold.agg(F.sum("nb_lignes")).collect()[0][0] == lignes_apres,
+)
+ajouter(
+    "Cohérence profit",
+    "Les profits négatifs sont conservés, pas corrigés",
+    relu_ventes.filter(F.col("ss_net_profit") < 0).count(),
+    True,
+)
+
+bilan = spark.createDataFrame(controles, ["controle", "regle", "resultat", "statut"])
+bilan.show(20, truncate=False)
+print("écarts", bilan.filter(F.col("statut") == "ECART").count())
+
+## cellule 13 – sortie
++-----------------+----------------------------------------------------------------+---------------+------+
+|controle         |regle                                                           |resultat       |statut|
++-----------------+----------------------------------------------------------------+---------------+------+
+|Volume ventes    |Lignes Silver = lignes du fichier, si rien n'est écarté         |667579 / 667579|OK    |
+|Volume produits  |Lignes Silver = lignes du fichier, si rien n'est écarté         |17820 / 17820  |OK    |
+|Complétude vente |Date, article, magasin, ticket, quantité et montant net non nuls|0              |OK    |
+|Unicité produit  |i_item_sk unique dans Silver item                               |0              |OK    |
+|Validité quantité|ss_quantity > 0                                                 |0              |OK    |
+|Validité montant |ss_net_paid non nul                                             |0              |OK    |
+|Intégrité article|Chaque ss_item_sk trouve un i_item_sk                           |0              |OK    |
+|Cohérence gold   |La somme des lignes Gold égale les lignes de vente jointes      |667579         |OK    |
+|Cohérence profit |Les profits négatifs sont conservés, pas corrigés               |495971         |OK    |
++-----------------+----------------------------------------------------------------+---------------+------+
+
+écarts 0

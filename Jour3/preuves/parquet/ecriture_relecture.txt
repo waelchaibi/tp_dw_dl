@@ -1,0 +1,127 @@
+# Écriture Parquet puis relecture : schéma, lignes, échantillon
+# Source : notebooks/uc06_silver_gold.ipynb, cellule(s) 9 (sorties enregistrées)
+
+## cellule 9 – code
+(
+    ventes.write.mode("overwrite")
+    .option("compression", "snappy")
+    .parquet(SILVER_VENTES)
+)
+(
+    produits.write.mode("overwrite")
+    .option("compression", "snappy")
+    .parquet(SILVER_PRODUITS)
+)
+(
+    gold.write.mode("overwrite")
+    .option("compression", "snappy")
+    .parquet(GOLD)
+)
+
+for libelle, chemin, attendu in (
+    ("silver ventes", SILVER_VENTES, ventes.count()),
+    ("silver produits", SILVER_PRODUITS, produits.count()),
+    ("gold", GOLD, gold.count()),
+):
+    relu = spark.read.parquet(chemin)
+    print("====", libelle, chemin)
+    relu.printSchema()
+    print("lignes relues", relu.count(), "lignes attendues", attendu)
+    relu.show(3, truncate=False)
+
+## cellule 9 – sortie
+==== silver ventes /retail-lake/silver/uc06/store_sales
+root
+ |-- ss_sold_date_sk: long (nullable = true)
+ |-- ss_sold_time_sk: long (nullable = true)
+ |-- ss_item_sk: long (nullable = true)
+ |-- ss_customer_sk: long (nullable = true)
+ |-- ss_cdemo_sk: long (nullable = true)
+ |-- ss_hdemo_sk: long (nullable = true)
+ |-- ss_addr_sk: long (nullable = true)
+ |-- ss_store_sk: long (nullable = true)
+ |-- ss_promo_sk: long (nullable = true)
+ |-- ss_ticket_number: long (nullable = true)
+ |-- ss_quantity: integer (nullable = true)
+ |-- ss_wholesale_cost: decimal(7,2) (nullable = true)
+ |-- ss_list_price: decimal(7,2) (nullable = true)
+ |-- ss_sales_price: decimal(7,2) (nullable = true)
+ |-- ss_ext_discount_amt: decimal(7,2) (nullable = true)
+ |-- ss_ext_sales_price: decimal(7,2) (nullable = true)
+ |-- ss_ext_wholesale_cost: decimal(7,2) (nullable = true)
+ |-- ss_ext_list_price: decimal(7,2) (nullable = true)
+ |-- ss_ext_tax: decimal(7,2) (nullable = true)
+ |-- ss_coupon_amt: decimal(7,2) (nullable = true)
+ |-- ss_net_paid: decimal(7,2) (nullable = true)
+ |-- ss_net_paid_inc_tax: decimal(7,2) (nullable = true)
+ |-- ss_net_profit: decimal(7,2) (nullable = true)
+ |-- source_fichier: string (nullable = true)
+ |-- source_lot: string (nullable = true)
+
+lignes relues 667579 lignes attendues 667579
++---------------+---------------+----------+--------------+-----------+-----------+----------+-----------+-----------+----------------+-----------+-----------------+-------------+--------------+-------------------+------------------+---------------------+-----------------+----------+-------------+-----------+-------------------+-------------+-----------------------------------------------------+----------+
+|ss_sold_date_sk|ss_sold_time_sk|ss_item_sk|ss_customer_sk|ss_cdemo_sk|ss_hdemo_sk|ss_addr_sk|ss_store_sk|ss_promo_sk|ss_ticket_number|ss_quantity|ss_wholesale_cost|ss_list_price|ss_sales_price|ss_ext_discount_amt|ss_ext_sales_price|ss_ext_wholesale_cost|ss_ext_list_price|ss_ext_tax|ss_coupon_amt|ss_net_paid|ss_net_paid_inc_tax|ss_net_profit|source_fichier                                       |source_lot|
++---------------+---------------+----------+--------------+-----------+-----------+----------+-----------+-----------+----------------+-----------+-----------------+-------------+--------------+-------------------+------------------+---------------------+-----------------+----------+-------------+-----------+-------------------+-------------+-----------------------------------------------------+----------+
+|36890          |81494          |9193      |76161         |96763      |6356       |18378     |2          |122        |21              |33         |2.86             |4.98         |2.04          |97.02              |67.32             |94.38                |164.34           |0.67      |0.00         |67.32      |67.99              |-27.06       |/data/retail_project/data/store_sales/store_sales.dat|initial   |
+|36890          |16818          |11584     |60539         |1644467    |2528       |28778     |11         |78         |31              |59         |24.75            |39.85        |6.77          |1951.72            |399.43            |1460.25              |2351.15          |7.99      |0.00         |399.43     |407.42             |-1060.82     |/data/retail_project/data/store_sales/store_sales.dat|initial   |
+|36891          |43771          |10091     |46769         |159988     |6291       |46891     |2          |216        |75              |18         |40.24            |40.64        |23.57         |307.26             |424.26            |724.32               |731.52           |21.21     |0.00         |424.26     |445.47             |-300.06      |/data/retail_project/data/store_sales/store_sales.dat|initial   |
++---------------+---------------+----------+--------------+-----------+-----------+----------+-----------+-----------+----------------+-----------+-----------------+-------------+--------------+-------------------+------------------+---------------------+-----------------+----------+-------------+-----------+-------------------+-------------+-----------------------------------------------------+----------+
+only showing top 3 rows
+==== silver produits /retail-lake/silver/uc06/item
+root
+ |-- i_item_sk: long (nullable = true)
+ |-- i_item_id: string (nullable = true)
+ |-- i_rec_start_date: date (nullable = true)
+ |-- i_rec_end_date: date (nullable = true)
+ |-- i_item_desc: string (nullable = true)
+ |-- i_current_price: decimal(7,2) (nullable = true)
+ |-- i_wholesale_cost: decimal(7,2) (nullable = true)
+ |-- i_brand_id: long (nullable = true)
+ |-- i_brand: string (nullable = true)
+ |-- i_class_id: integer (nullable = true)
+ |-- i_class: string (nullable = true)
+ |-- i_category_id: integer (nullable = true)
+ |-- i_category: string (nullable = true)
+ |-- i_manufact_id: long (nullable = true)
+ |-- i_manufact: string (nullable = true)
+ |-- i_size: string (nullable = true)
+ |-- i_formulation: string (nullable = true)
+ |-- i_color: string (nullable = true)
+ |-- i_units: string (nullable = true)
+ |-- i_container: string (nullable = true)
+ |-- i_manager_id: long (nullable = true)
+ |-- i_product_name: string (nullable = true)
+ |-- source_fichier: string (nullable = true)
+ |-- source_lot: string (nullable = true)
+
+lignes relues 17820 lignes attendues 17820
++---------+----------------+----------------+--------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------+----------------+----------+-----------------------------------------------+----------+-----------------------+-------------+-----------+-------------+-------------------------------------+-------+------------------+-------+-------+-----------+------------+---------------------------------------------+---------------------------------------+----------+
+|i_item_sk|i_item_id       |i_rec_start_date|i_rec_end_date|i_item_desc                                                                                                                                                                                        |i_current_price|i_wholesale_cost|i_brand_id|i_brand                                        |i_class_id|i_class                |i_category_id|i_category |i_manufact_id|i_manufact                           |i_size |i_formulation     |i_color|i_units|i_container|i_manager_id|i_product_name                               |source_fichier                         |source_lot|
++---------+----------------+----------------+--------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------+----------------+----------+-----------------------------------------------+----------+-----------------------+-------------+-----------+-------------+-------------------------------------+-------+------------------+-------+-------+-----------+------------+---------------------------------------------+---------------------------------------+----------+
+|183      |AAAAAAAAAAAAAAHB|2000-11-06      |NULL          |quick regular theodolites nag sly waters; dogged decoys with the closely final forges need to nod always sly waters: final dogged escapades about the bold sly orbits detect silently over the     |2.99           |19.61           |1220529   |5rVZooofGkQZDUKGvwnASK1XqVpdQ18vnB9xnu7agutLgCQ|5         |Used & Rental Textbooks|3            |Books      |31           |SwDf4i9q3vdRqXGx7Vq                  |economy|gIjhyFU9KHmFg4JS5P|indian |Case   |Unknown    |85          |uvIyFgrc33lTjHpWYsqLp3MG33C8ra5GNg93Xlktjlb  |/data/retail_project/data/item/item.dat|initial   |
+|522      |AAAAAAAAAAAAAAUC|2000-06-30      |NULL          |careful enticing orbits for the fluffy orbits engage before the dogged ironic courts: instructions must have to hinder fluffily thin theodolites: dugouts over the close sentiments sha            |13.75          |12.94           |4029338   |L9AOtz4ccsY5Fm8cufrjLp                         |6         |Jazz                   |2            |Music      |636          |VNzsFyLKGDmms70f7f                   |small  |F4MoPvOEqyOKAEKR  |puff   |Gross  |Unknown    |11          |iI4GVtneRdsTNmsToYtOaiUAFL5RoWDki4htZ8       |/data/retail_project/data/item/item.dat|initial   |
+|527      |AAAAAAAAAAAAAAUH|2000-08-27      |NULL          |quietly even dugouts under the pains thrash gifts: slow slow notornis grow. permanent warhorses doubt; enticing bold theodolites try to boost blithely sly dinos. quietly thin grouches shall have |24.22          |24.71           |8900431   |wgPzJoN2xoSwY1qFIO1YA                          |1         |TV                     |8            |Movies & TV|906          |aBLoGfiLAws5GdoohMD6mUGn2sMMboPwKXn8I|petite |gdR               |royal  |Pound  |Unknown    |45          |aud1rc5QY6YkNyyQ9fdsUDfnVXc3qqm3po12g3zCcdNGv|/data/retail_project/data/item/item.dat|initial   |
++---------+----------------+----------------+--------------+---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------+---------------+----------------+----------+-----------------------------------------------+----------+-----------------------+-------------+-----------+-------------+-------------------------------------+-------+------------------+-------+-------+-----------+------------+---------------------------------------------+---------------------------------------+----------+
+only showing top 3 rows
+==== gold /retail-lake/gold/uc06/ventes_magasin_par_produit
+root
+ |-- i_item_sk: long (nullable = true)
+ |-- i_item_id: string (nullable = true)
+ |-- i_product_name: string (nullable = true)
+ |-- i_category: string (nullable = true)
+ |-- i_class: string (nullable = true)
+ |-- nb_lignes: long (nullable = true)
+ |-- quantite: long (nullable = true)
+ |-- ca_net: decimal(17,2) (nullable = true)
+ |-- ca_net_ttc: decimal(17,2) (nullable = true)
+ |-- profit_net: decimal(17,2) (nullable = true)
+
+lignes relues 17820 lignes attendues 17820
++---------+----------------+-------------------------------------------+------------+--------------------+---------+--------+--------+----------+----------+
+|i_item_sk|i_item_id       |i_product_name                             |i_category  |i_class             |nb_lignes|quantite|ca_net  |ca_net_ttc|profit_net|
++---------+----------------+-------------------------------------------+------------+--------------------+---------+--------+--------+----------+----------+
+|6195     |AAAAAAAAAAAAAJEH|abCS7lpxxv6szEOTMUZwulcjB4HOOGmeP2ixlRrKoif|Books       |New                 |27       |1094    |32375.05|34271.16  |-25437.22 |
+|10010    |AAAAAAAAAAAAAOVA|jMHE6kXJIOIJbZqWT9cfE2sMI5UHn8             |Toys & Games|Action & Toy Figures|19       |909     |33282.10|34648.53  |-8235.39  |
+|13201    |AAAAAAAAAAAAATNT|pUS                                        |Music       |Rock                |21       |1160    |55807.15|58124.08  |-17428.90 |
++---------+----------------+-------------------------------------------+------------+--------------------+---------+--------+--------+----------+----------+
+only showing top 3 rows

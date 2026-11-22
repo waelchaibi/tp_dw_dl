@@ -1,0 +1,78 @@
+# Valeurs vides, doublons, clés, bornes
+# Source : notebooks/uc06_exploration.ipynb, cellule(s) 6, 7 (sorties enregistrées)
+
+## cellule 6 – code
+def vides(df):
+    return df.select([
+        F.sum(F.when(F.col(c).isNull() | (F.trim(F.col(c)) == ""), 1).otherwise(0)).alias(c)
+        for c in df.columns
+    ])
+
+for nom, df in frames.items():
+    print("==== valeurs vides", nom)
+    ligne = vides(df).collect()[0]
+    total = df.count()
+    for colonne in df.columns:
+        nb = ligne[colonne]
+        if nb:
+            print(f"  {colonne} : {nb} ({nb / total:.2%})")
+    if not any(ligne):
+        print("  aucune valeur vide")
+
+## cellule 6 – sortie
+==== valeurs vides store_sales
+  ss_cdemo_sk : 238 (0.04%)
+  ss_hdemo_sk : 295 (0.04%)
+  ss_addr_sk : 448 (0.07%)
+  ss_promo_sk : 158 (0.02%)
+==== valeurs vides item
+  i_rec_end_date : 17820 (100.00%)
+  i_item_desc : 4 (0.02%)
+  i_brand_id : 8 (0.04%)
+  i_brand : 6 (0.03%)
+
+## cellule 7 – code
+for nom, df in frames.items():
+    total = df.count()
+    distincts = df.distinct().count()
+    print(nom, "lignes", total, "lignes distinctes", distincts, "doublons exacts", total - distincts)
+
+ventes = frames["store_sales"]
+produits = frames["item"]
+print("tickets distincts", ventes.select("ss_ticket_number").distinct().count())
+print("i_item_sk distincts", produits.select("i_item_sk").distinct().count())
+print("i_item_id distincts", produits.select("i_item_id").distinct().count())
+
+print("quantité min/max")
+ventes.select(
+    F.min("ss_quantity").alias("qte_min"),
+    F.max("ss_quantity").alias("qte_max"),
+).show()
+print("ss_net_paid et ss_net_profit, aperçu des bornes (texte)")
+ventes.select(
+    F.min("ss_net_paid").alias("ca_min"),
+    F.max("ss_net_paid").alias("ca_max"),
+    F.min("ss_net_profit").alias("profit_min"),
+    F.max("ss_net_profit").alias("profit_max"),
+).show(truncate=False)
+
+## cellule 7 – sortie
+store_sales lignes 667579 lignes distinctes 667579 doublons exacts 0
+item lignes 17820 lignes distinctes 17820 doublons exacts 0
+tickets distincts 89100
+i_item_sk distincts 17820
+i_item_id distincts 17820
+quantité min/max
++-------+-------+
+|qte_min|qte_max|
++-------+-------+
+|      1|     99|
++-------+-------+
+
+ss_net_paid et ss_net_profit, aperçu des bornes (texte)
++------+-------+----------+----------+
+|ca_min|ca_max |profit_min|profit_max|
++------+-------+----------+----------+
+|0.00  |9999.82|-0.01     |999.96    |
++------+-------+----------+----------+
+

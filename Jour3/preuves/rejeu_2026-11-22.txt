@@ -1,0 +1,58 @@
+# Rejeu de notebooks/uc06_silver_gold.ipynb le 22/11/2026, conteneur lake (stack actuelle)
+# docker compose exec lake jupyter nbconvert --to notebook --execute --output /tmp/uc06_silver_gold_rejeu.ipynb uc06_silver_gold.ipynb
+
+## environnement (cellule 1)
+Python 3.12.14
+Spark 4.1.4
+mode local[*]
+defaultFS hdfs://localhost:9000
+entrées /data/retail_project/data/store_sales/store_sales.dat /data/retail_project/data/item/item.dat
+sorties /retail-lake/silver/uc06/store_sales /retail-lake/silver/uc06/item /retail-lake/gold/uc06/ventes_magasin_par_produit
+
+## nettoyage (cellule 3)
+ventes : lignes fichier 667579 lignes lues 667579
+produits : lignes fichier 17820 lignes lues 17820
+ventes écartées 0
+doublons exacts retirés 0
+profits négatifs conservés 495971
+produits écartés 0
+i_rec_end_date vides 17820
+silver ventes 667579 silver produits 17820
+
+## jointure (cellule 5)
+clés produit distinctes 17820 lignes produit 17820
+lignes avant 667579 lignes après 667579 orphelins 0
+
+## gold (cellule 7)
+produits dans le gold 17820
+lignes de vente couvertes 667579
+ca_net total 1150529586.37
+
+## parquet (cellule 9)
+lignes relues 667579 lignes attendues 667579
+lignes relues 17820 lignes attendues 17820
+lignes relues 17820 lignes attendues 17820
+
+## formats (cellule 11)
+source ventes, plat, octets 92764700
+silver ventes, parquet, octets 57010210
+silver produits, parquet, octets 5785633
+gold parquet, octets 1221478
+gold csv de comparaison, octets 1884967
+csv de comparaison supprimé
+
+## contrôles qualité (cellule 13)
++-----------------+----------------------------------------------------------------+---------------+------+
+|controle         |regle                                                           |resultat       |statut|
++-----------------+----------------------------------------------------------------+---------------+------+
+|Volume ventes    |Lignes Silver = lignes du fichier, si rien n'est écarté         |667579 / 667579|OK    |
+|Volume produits  |Lignes Silver = lignes du fichier, si rien n'est écarté         |17820 / 17820  |OK    |
+|Complétude vente |Date, article, magasin, ticket, quantité et montant net non nuls|0              |OK    |
+|Unicité produit  |i_item_sk unique dans Silver item                               |0              |OK    |
+|Validité quantité|ss_quantity > 0                                                 |0              |OK    |
+|Validité montant |ss_net_paid non nul                                             |0              |OK    |
+|Intégrité article|Chaque ss_item_sk trouve un i_item_sk                           |0              |OK    |
+|Cohérence gold   |La somme des lignes Gold égale les lignes de vente jointes      |667579         |OK    |
+|Cohérence profit |Les profits négatifs sont conservés, pas corrigés               |495971         |OK    |
++-----------------+----------------------------------------------------------------+---------------+------+
+écarts 0

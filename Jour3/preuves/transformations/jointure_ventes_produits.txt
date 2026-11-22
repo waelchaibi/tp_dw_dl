@@ -1,0 +1,35 @@
+# Jointure vérifiée ventes → produits
+# Source : notebooks/uc06_silver_gold.ipynb, cellule(s) 5 (sorties enregistrées)
+
+## cellule 5 – code
+referentiel = produits.select(
+    "i_item_sk", "i_item_id", "i_product_name", "i_category", "i_class"
+)
+lignes_avant = ventes.count()
+cles_produit = produits.select("i_item_sk").distinct().count()
+print("clés produit distinctes", cles_produit, "lignes produit", produits.count())
+
+enrichi = ventes.join(referentiel, ventes.ss_item_sk == referentiel.i_item_sk, "left")
+lignes_apres = enrichi.count()
+orphelins = enrichi.filter(F.col("i_item_id").isNull()).count()
+print("lignes avant", lignes_avant, "lignes après", lignes_apres, "orphelins", orphelins)
+if lignes_apres != lignes_avant:
+    raise SystemExit("la jointure multiplie les lignes, écriture arrêtée")
+enrichi = enrichi.persist()
+enrichi.select(
+    "ss_ticket_number", "ss_item_sk", "i_item_id", "i_category", "ss_quantity", "ss_net_paid"
+).show(5, truncate=False)
+
+## cellule 5 – sortie
+clés produit distinctes 17820 lignes produit 17820
+lignes avant 667579 lignes après 667579 orphelins 0
++----------------+----------+----------------+------------------------+-----------+-----------+
+|ss_ticket_number|ss_item_sk|i_item_id       |i_category              |ss_quantity|ss_net_paid|
++----------------+----------+----------------+------------------------+-----------+-----------+
+|32              |12638     |AAAAAAAAAAAAASSC|Tools & Home Improvement|65         |162.50     |
+|141             |2571      |AAAAAAAAAAAAADUX|Movies & TV             |28         |1.45       |
+|237             |1630      |AAAAAAAAAAAAACKS|Movies & TV             |2          |32.50      |
+|303             |14435     |AAAAAAAAAAAAAVJF|Music                   |79         |17.38      |
+|340             |12673     |AAAAAAAAAAAAASTL|Books                   |63         |190.26     |
++----------------+----------+----------------+------------------------+-----------+-----------+
+only showing top 5 rows

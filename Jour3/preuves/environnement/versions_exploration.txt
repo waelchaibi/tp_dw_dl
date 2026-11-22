@@ -1,0 +1,33 @@
+# Versions, mode d'exécution, ressources
+# Source : notebooks/uc06_exploration.ipynb, cellule(s) 1 (sorties enregistrées)
+
+## cellule 1 – code
+import os
+import sys
+
+from pyspark.sql import SparkSession
+from pyspark.sql import functions as F
+
+spark = (
+    SparkSession.builder
+    .appName("UC06-exploration")
+    .master("local[*]")
+    .config("spark.ui.showConsoleProgress", "false")
+    .getOrCreate()
+)
+spark.sparkContext.setLogLevel("ERROR")
+
+print("Python", sys.version.split()[0])
+print("Spark", spark.version)
+print("mode", spark.sparkContext.master)
+print("parallelisme", spark.sparkContext.defaultParallelism)
+print("JAVA_HOME", os.environ.get("JAVA_HOME"))
+print("coeurs", os.cpu_count())
+
+## cellule 1 – sortie
+Python 3.12.3
+Spark 4.3.0
+mode local[*]
+parallelisme 12
+JAVA_HOME /usr/lib/jvm/java-17-openjdk-amd64
+coeurs 12

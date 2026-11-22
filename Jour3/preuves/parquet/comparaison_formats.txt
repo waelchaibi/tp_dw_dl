@@ -1,0 +1,31 @@
+# Volumes plat / Parquet / CSV, chemins HDFS
+# Source : notebooks/uc06_silver_gold.ipynb, cellule(s) 11 (sorties enregistrées)
+
+## cellule 11 – code
+def hdfs(*args):
+    return subprocess.check_output(["hdfs", "dfs", *args], text=True).strip()
+
+gold.write.mode("overwrite").option("header", True).csv(CSV_COMPARAISON)
+print("source ventes, plat, octets", os.path.getsize(VENTES))
+print("silver ventes, parquet, octets", octets_hdfs(SILVER_VENTES)[0])
+print("silver produits, parquet, octets", octets_hdfs(SILVER_PRODUITS)[0])
+print("gold parquet, octets", octets_hdfs(GOLD)[0])
+print("gold csv de comparaison, octets", octets_hdfs(CSV_COMPARAISON)[0])
+print(hdfs("-ls", "/retail-lake/silver/uc06"))
+print(hdfs("-ls", "/retail-lake/gold/uc06"))
+subprocess.check_call(["hdfs", "dfs", "-rm", "-r", "-f", "/retail-lake/tmp/uc06"])
+print("csv de comparaison supprimé")
+
+## cellule 11 – sortie
+source ventes, plat, octets 92764700
+silver ventes, parquet, octets 57010955
+silver produits, parquet, octets 5785633
+gold parquet, octets 1147473
+gold csv de comparaison, octets 1883641
+Found 2 items
+drwxr-xr-x   - etudiant supergroup          0 2026-11-19 10:14 /retail-lake/silver/uc06/item
+drwxr-xr-x   - etudiant supergroup          0 2026-11-19 10:14 /retail-lake/silver/uc06/store_sales
+Found 1 items
+drwxr-xr-x   - etudiant supergroup          0 2026-11-19 10:14 /retail-lake/gold/uc06/ventes_magasin_par_produit
+Deleted /retail-lake/tmp/uc06
+csv de comparaison supprimé
