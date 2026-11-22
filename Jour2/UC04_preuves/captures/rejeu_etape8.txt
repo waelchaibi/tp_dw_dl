@@ -1,0 +1,48 @@
+# Étape 8 – 2026-11-22 17:28:22 UTC – hôte lake – utilisateur etudiant
+
+$ ls -l /data/retail_project/data/income_band/income_band.dat
+-rw-rw-rw-. 2 etudiant etudiant 327 Nov 15 22:35 /data/retail_project/data/income_band/income_band.dat
+
+$ wc -l < /data/retail_project/data/income_band/income_band.dat
+20
+
+$ head -n 2 /data/retail_project/data/income_band/income_band.dat
+0|1|10000
+1|10001|20000
+
+$ cp /data/retail_project/data/income_band/income_band.dat /data/nifi/input/income_band.dat
+
+$ ls -l /data/retail_project/data/income_band/income_band.dat /data/nifi/input/income_band.dat
+-rw-r--r--. 1 etudiant etudiant 327 Nov 22 17:28 /data/nifi/input/income_band.dat
+-rw-rw-rw-. 2 etudiant etudiant 327 Nov 15 22:35 /data/retail_project/data/income_band/income_band.dat
+
+$ hdfs dfs -mkdir -p /retail-lake/raw/nifi
+
+$ hdfs dfs -ls -d /retail-lake/raw/nifi
+drwxr-xr-x   - etudiant supergroup          0 2026-11-22 17:28 /retail-lake/raw/nifi
+
+$ api create
+GetFile UC04 id=044d5425-01a2-1000-39c8-68ef2a359704 valide=False
+  validation: 'Relationship success' is invalid because Relationship 'success' is not connected to any component and is not auto-terminated
+PutHDFS UC04 id=044d54d9-01a2-1000-58b4-d9aa4bc6253c valide=False
+  validation: 'Relationship failure' is invalid because Relationship 'failure' is not connected to any component and is not auto-terminated
+  validation: 'Upstream Connections' is invalid because Processor requires an upstream connection but currently has none
+LogAttribute echec UC04 id=044d5579-01a2-1000-65d0-b9537092c3d0 valide=False
+  validation: 'Upstream Connections' is invalid because Processor requires an upstream connection but currently has none
+connexion GetFile UC04 --success--> PutHDFS UC04 id=044d559d-01a2-1000-13df-4a34bca5aea5
+connexion PutHDFS UC04 --failure--> LogAttribute echec UC04 id=044d55cf-01a2-1000-fb7f-9039805848de
+GetFile (success) -> PutHDFS (success auto-terminée)
+PutHDFS (failure) -> LogAttribute (success auto-terminée)
+
+$ api show
+PutHDFS UC04 etat=STOPPED type=PutHDFS
+  Hadoop Configuration Resources=/opt/hadoop/etc/hadoop/core-site.xml,/opt/hadoop/etc/hadoop/hdfs-site.xml
+  Directory=/retail-lake/raw/nifi
+  Conflict Resolution Strategy=fail
+LogAttribute echec UC04 etat=STOPPED type=LogAttribute
+  Log Level=warn
+  Log Payload=false
+GetFile UC04 etat=STOPPED type=GetFile
+  Input Directory=/data/nifi/input
+  Keep Source File=false
+  Recurse Subdirectories=false

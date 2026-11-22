@@ -1,7 +1,7 @@
 #!/bin/bash
 # UC-04 – commandes exécutées dans le conteneur
 # docker compose exec -T lake bash -s <étape> < Jour2/UC04_preuves/uc04.sh
-# Étapes : 6 découverte, 8 construction du flux, 9 exécution, 10 erreur, 11 provenance.
+# Étapes : 6 découverte, 8 construction du flux, 9 exécution, 10 erreur, 11 provenance, 12 doublon (failure).
 # Le fichier d'essai est une copie de income_band.dat. L'original et le dépôt UC-03 ne sont pas modifiés.
 set -u
 run() { echo; echo "\$ $*"; eval "$@" 2>&1; }
@@ -277,6 +277,17 @@ elif cmd == "restore":
             run_state(auth, current, "STOPPED")
     print("processeurs arrêtés, configuration d'origine rétablie")
 
+elif cmd == "status":
+    for item in processors(auth, group):
+        snap = call("GET", f"/nifi-api/flow/processors/{item['component']['id']}/status", auth)
+        agg = snap["processorStatus"]["aggregateSnapshot"]
+        print(f"{agg['name']}: etat={agg['runStatus']} entrees={agg['flowFilesIn']} sorties={agg['flowFilesOut']} (5 min)")
+    flow = call("GET", f"/nifi-api/flow/process-groups/{group}", auth)
+    for conn in flow["processGroupFlow"]["flow"]["connections"]:
+        st = conn["status"]["aggregateSnapshot"]
+        rel = ",".join(conn["component"]["selectedRelationships"])
+        print(f"file {st['sourceName']} --{rel}--> {st['destinationName']}: en attente={st['queuedCount']}")
+
 elif cmd == "provenance":
     body = {"provenance": {"request": {"maxResults": 20}}}
     created = call("POST", "/nifi-api/provenance", auth, body)
@@ -365,6 +376,23 @@ case "$1" in
   echo
   echo "La provenance relie l'identifiant du FlowFile, le nom du fichier et l'heure de chaque événement."
   echo "RECEIVE correspond à la lecture locale, SEND au dépôt HDFS, ATTRIBUTES_MODIFIED aux attributs posés par PutHDFS, DROP à la fin du FlowFile."
+  ;;
+12)
+  # Second test d'erreur : le même fichier arrive deux fois. PutHDFS (Conflict=fail) doit le refuser.
+  run "hdfs dfs -ls $DST"
+  run "cp $SRC $WORK"
+  echo
+  echo "\$ api start"
+  api start
+  sleep 45
+  echo
+  echo "\$ api status"
+  api status
+  run "hdfs dfs -ls $DST"
+  run "grep -E 'PutHDFS.*penalizing|LogAttribute.*logging for FlowFile' /opt/nifi/logs/nifi-app.log | tail -n 2 | grep -oE '^[0-9-]+ [0-9:,]+|(PutHDFS|LogAttribute)\\[id=[0-9a-f-]+\\] (penalizing|logging for FlowFile)|name=[^,]+|routing to [a-z]+'"
+  echo
+  echo "\$ api stop"
+  api stop
   ;;
 *)
   echo "étape inconnue: $1" >&2
