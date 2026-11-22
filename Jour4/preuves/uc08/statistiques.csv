@@ -1,0 +1,9 @@
+niveau,mesure,n,min,max,moyenne,mediane,somme
+ligne de vente,ss_quantity,667579,1.0,100.0,50.56,51.0,33755474.0
+ligne de vente,ss_sales_price,667579,0.0,199.3,37.86,27.69,25277009.02
+ligne de vente,ss_net_paid,667579,0.0,18745.0,1723.44,878.54,1150529586.37
+ticket,ca_ticket,89100,0.0,64785.95,12912.79,11645.15,1150529586.37
+ticket,lignes_ticket,89100,1.0,14.0,7.49,7.0,667579.0
+ticket,unites_ticket,89100,1.0,1143.0,378.85,372.0,33755474.0
+magasin x mois,ca_net,720,504366.43,2169330.6,1597957.76,1612660.69,1150529586.37
+magasin x mois,nb_tickets,720,39.0,163.0,123.75,124.0,89100.0

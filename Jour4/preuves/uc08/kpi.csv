@@ -1,0 +1,8 @@
+kpi,valeur,unite,formule,perimetre
+CA net magasin,1150529586.37,unité monétaire,SUM(ss_net_paid),lot initial
+Quantités vendues,33755474,unités,SUM(ss_quantity),lot initial
+Nombre de tickets,89100,tickets,COUNT(DISTINCT ss_ticket_number),lot initial
+Panier moyen,12912.79,unité monétaire / ticket,CA net / tickets,lot initial
+Quantité retournée,777567,unités,SUM(sr_return_quantity),retours datés 2001-01-01 -> 2005-12-13
+Montant retourné,29285241.45,unité monétaire,SUM(sr_return_amt),retours datés 2001-01-01 -> 2005-12-13
+Taux de retour (quantité),2.3,%,quantité retournée / quantités vendues,période commune

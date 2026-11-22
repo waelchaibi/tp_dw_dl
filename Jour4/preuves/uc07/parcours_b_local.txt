@@ -1,0 +1,77 @@
+# UC-07 parcours B – 2026-11-22 18:34:43 CET – hôte fedora
+
+$ docker compose ps --format '{{.Service}} {{.Image}} {{.Status}}'
+iceberg-rest apache/iceberg-rest-fixture:1.10.1 Up 8 minutes (healthy)
+lake retail-lake:tp2 Up 8 minutes
+minio pgsty/minio:RELEASE.2026-08-04T00-00-00Z Up 8 minutes (healthy)
+trino trinodb/trino:484 Up 8 minutes (healthy)
+
+$ trino 'SELECT node_version FROM system.runtime.nodes'
+ node_version 
+--------------
+ 484          
+(1 row)
+
+$ trino 'SHOW SCHEMAS FROM iceberg'
+       Schema       
+--------------------
+ bronze             
+ gold               
+ information_schema 
+ silver             
+ system             
+(5 rows)
+
+$ trino 'SHOW TABLES FROM iceberg.gold'
+           Table            
+----------------------------
+ retours_magasin_mensuels   
+ ventes_magasin_mensuelles  
+ ventes_magasin_par_produit 
+(3 rows)
+
+$ trino 'SELECT count(*) AS lignes, sum(nb_lignes) AS lignes_vente, sum(ca_net) AS ca_net FROM iceberg.gold.ventes_magasin_mensuelles'
+ lignes | lignes_vente |    ca_net     
+--------+--------------+---------------
+    720 |       667579 | 1150529586.37 
+(1 row)
+
+$ trino 'SELECT snapshot_id, operation, committed_at FROM iceberg.gold."ventes_magasin_mensuelles$snapshots" ORDER BY committed_at'
+     snapshot_id     | operation |        committed_at         
+---------------------+-----------+-----------------------------
+ 2620194893228819460 | overwrite | 2026-11-22 17:29:08.303 UTC 
+(1 row)
+
+$ trino 'SELECT file_format, count(*) AS fichiers, sum(file_size_in_bytes) AS octets FROM iceberg.gold."ventes_magasin_mensuelles$files" GROUP BY file_format'
+ file_format | fichiers | octets 
+-------------+----------+--------
+ PARQUET     |        1 |  15010 
+(1 row)
+
+$ mc 'mc ls local/'
+[2026-11-22 17:26:20 UTC]     0B warehouse/
+
+$ mc 'mc ls local/warehouse/'
+[2026-11-22 17:34:53 UTC]     0B bronze/
+[2026-11-22 17:34:53 UTC]     0B gold/
+[2026-11-22 17:34:53 UTC]     0B silver/
+
+$ mc 'mc du --depth 2 local/warehouse/'
+209MiB	238 objects	warehouse/bronze
+821KiB	16 objects	warehouse/gold
+43MiB	48 objects	warehouse/silver
+253MiB	302 objects	warehouse
+
+$ mc 'mc ls --recursive local/warehouse/gold/ | head -n 12'
+[2026-11-22 17:29:08 UTC]  10KiB STANDARD retours_magasin_mensuels/data/00000-603-1c7b3265-3231-44c7-853c-533f99b6fc08-0-00001.parquet
+[2026-11-22 17:29:08 UTC] 2.0KiB STANDARD retours_magasin_mensuels/metadata/00000-1f40158f-899e-4e8f-ba51-f75307f7085f.metadata.json
+[2026-11-22 17:29:08 UTC] 7.1KiB STANDARD retours_magasin_mensuels/metadata/589002f6-1dc4-4fe5-a011-6994aef65fde-m0.avro
+[2026-11-22 17:29:08 UTC] 4.4KiB STANDARD retours_magasin_mensuels/metadata/snap-3651184441841221685-1-589002f6-1dc4-4fe5-a011-6994aef65fde.avro
+[2026-11-22 17:29:08 UTC]  15KiB STANDARD ventes_magasin_mensuelles/data/00000-599-5ff50d9f-d0b2-4a07-8188-8da468414479-0-00001.parquet
+[2026-11-22 17:29:08 UTC] 2.2KiB STANDARD ventes_magasin_mensuelles/metadata/00000-5fcf5937-d749-40f3-9b3f-e92b91b7b511.metadata.json
+[2026-11-22 17:29:08 UTC] 7.5KiB STANDARD ventes_magasin_mensuelles/metadata/6cbf0013-68b0-4170-a3d9-f6ad928b97b1-m0.avro
+[2026-11-22 17:29:08 UTC] 4.4KiB STANDARD ventes_magasin_mensuelles/metadata/snap-2620194893228819460-1-6cbf0013-68b0-4170-a3d9-f6ad928b97b1.avro
+[2026-11-22 17:29:07 UTC] 140KiB STANDARD ventes_magasin_par_produit/data/00000-577-a4bead32-fe02-4f3f-b2ba-7f283faa2b52-0-00001.parquet
+[2026-11-22 17:29:07 UTC] 141KiB STANDARD ventes_magasin_par_produit/data/00001-578-a4bead32-fe02-4f3f-b2ba-7f283faa2b52-0-00001.parquet
+[2026-11-22 17:29:07 UTC] 143KiB STANDARD ventes_magasin_par_produit/data/00002-579-a4bead32-fe02-4f3f-b2ba-7f283faa2b52-0-00001.parquet
+[2026-11-22 17:29:07 UTC] 145KiB STANDARD ventes_magasin_par_produit/data/00003-580-a4bead32-fe02-4f3f-b2ba-7f283faa2b52-0-00001.parquet
